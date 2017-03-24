@@ -26,7 +26,7 @@ namespace CPGame {
         
     };
     
-    union BoardData {
+    union BoardObjectData {
         PlayerObjectData player;
         
     };
@@ -34,13 +34,20 @@ namespace CPGame {
     struct BoardObject {
         std::vector<BoardPosition> coveredFields; // x, y - < 0, n + 1>
         BoardObjectType type;
-        BoardData data;
+        BoardObjectData data;
     };
     
     struct BoardState {
         std::vector<BoardObject> objects;
-        int boardSize; // board { n x n }
+        
     };
+    
+    struct Board {
+        std::vector<BoardState> stateHistory; // last is the actual
+        int boardSize; // board { n x n }
+        
+    };
+    
     
     struct BoardPlayerUpdateRequest {
         std::vector<int> objectIndexes;
@@ -58,15 +65,8 @@ namespace CPGame {
         
     };
     
-    typedef std::function<void(std::shared_ptr<const std::vector<CPGame::BoardState>>, BoardPlayerUpdateRequest, std::shared_ptr<Promise<BoardPlayerUpdateResult>> res)>PlayerControllerCallback;
+    typedef std::function<void(std::shared_ptr<const Board>, BoardPlayerUpdateRequest, std::shared_ptr<Promise<BoardPlayerUpdateResult>> res)>PlayerControllerCallback;
     
-    class GameManager {
-    public:
-        GameManager(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer);
-        ~GameManager();
-        
-        void start();
-    };
 }
 
 

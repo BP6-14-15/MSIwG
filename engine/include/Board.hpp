@@ -11,21 +11,24 @@
 
 #include <stdio.h>
 
-struct BoardPosition {
-    int x,y;
+namespace CPGame {
     
-    bool operator==(const BoardPosition& a) const {
-        return (x == a.x && y == a.y);
+    struct BoardPosition {
+        int x,y;
         
-    }
-};
+        bool operator==(const BoardPosition& a) const {
+            return (x == a.x && y == a.y);
+            
+        }
+    };
 
-enum class PlayerType {
-    police, criminal
-};
+    enum class PlayerType {
+        police, criminal
+    };
 
-enum class BoardMoveDirection {
-    left, top, right, bottom, none
-};
+    enum class BoardMoveDirection {
+        left, top, right, bottom, none
+    };
+}
 
 #endif /* Board_hpp */
