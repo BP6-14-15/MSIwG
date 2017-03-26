@@ -60,11 +60,6 @@ namespace CPGame {
         
     };
     
-    enum class RequestType {
-        policeman, criminal
-        
-    };
-    
     typedef std::function<void(std::shared_ptr<const Board>, BoardPlayerUpdateRequest, std::shared_ptr<Promise<BoardPlayerUpdateResult>> res)>PlayerControllerCallback;
     
 }

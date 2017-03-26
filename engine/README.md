@@ -1,12 +1,154 @@
-# Kompilacja
+#### Spis treści 
+* [Funkcja klienta](#clientFcn)  
+* [Środowisko](#env)
+  * [Konfiguracja](#conf)
+    * [Automatyczna](#auto)
+    * [Manualna](#manual)
+  * [Uruchamianie](#launch)
 
-Zakładam, że będziemy pracować na Linuxie (Ubuntu ?), jednak różne wersje mają różne kompilatory, a projekt wymaga  standardu C++17.  
-Ja korzystam z Clang, więc przygotowałem krótką instrukcję i skrypty do instalacji najnowszej wersji obsługującej ten standard, przygotowane i przetestowane były pod Ubuntu.  
+<a name="clientFcn">  
+
+# Funkcja klienta 
+Zawarłem tu generalny opis sposobu interakcji z funkcją klienta, oraz zasad, których należy przestrzegać. 
+Co do praktycznej implementacji to najlepiej spojrzeć na zawarty przykład.
+
+
+```cpp
+void updatePlayer(shared_ptr<const CPGame::Board> states,
+                  CPGame::BoardPlayerUpdateRequest req,
+                  shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>> promise
+)
+```
+## `CPGame::Board` states 
+```cpp
+struct Board {
+    std::vector<BoardState> stateHistory; // last is the actual
+    int boardSize; // board { n x n }        
+};
+```
+Przechowuje on historię ostatnich 5 stanów planszy, oraz jej rozmiar (zawsze n x n). 
+
+### `CPGame::BoardState` 
+```cpp
+struct BoardState {
+    std::vector<BoardObject> objects;
+};
+```
+Obecnie stan planszy to po prostu wektor wszystkich jej obiektów. 
+
+### `CPGame::BoardObject` 
+```cpp
+struct BoardObject {
+    std::vector<BoardPosition> coveredFields; // x, y - < 0, n + 1>
+    BoardObjectType type;
+    BoardObjectData data;
+};
+```
+Obiekt planszy składa sie z wektoru zajmowanych pól na planszy - **ważne** - pola na planszy mogą mieć wartości <0, N + 1>, gdzie pola 0 i N + 1 to granice planszy, na nich poruszają się tylko bramy - no i złodziej o ile w danym miejscu jest brama, policjancji i ściany zajmować mogą jedynie pola z przedziału <1,N>.  
+
+#### `CPGame::BoardObjectType`
+
+```cpp
+enum class BoardObjectType {
+    player, wall, gate
+        
+};
+```
+
+#### `CPGame::BoardObjectData`
+```cpp
+enum class PlayerType {
+    police, criminal
+};
+
+struct PlayerObjectData {
+    PlayerType type;
+};
+    
+union BoardObjectData {
+    PlayerObjectData player;
+        
+};
+
+```
+## `CPGame::BoardPlayerUpdateRequest` req
+```cpp
+struct BoardPlayerUpdateRequest {
+    std::vector<int> objectIndexes;
+    int numberOfMovesRequired = 5;
+};
+```
+Obiekt ten to specyfikacja żądania aktualizacji gracza.  
+Wektor `objectIndexes` zawiera indeksy obiektów z wektora `object` obiektu `BoardState`, to właśnie tymi obiektami gracz może sterować.   
+Ważne jest aby trzymać się liczby żądanych ruchów (obecnie zawsze 5), jeśli liczba dostarczonych ruchów nie będzie się zgadzać to silnik zignoruje wszystkie z nich. 
+
+## `shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>>`
+```cpp
+struct BoardPlayerUpdateResult {
+    std::vector<std::vector<BoardMoveDirection>> moveDirection;
+};
+```
+Poprzez ten obiekt dokonujemy aktualizacji postaci gracza, wystarczy na nim wyowałć metodę `setValue` z obiektem typu `CPGame::BoardPlayerUpdateResult`. Obiekt ten to dwuwymiarowy wektor, wiersze to postacie gracza, a kolumny to ich odpowiednie ruchy.   
+**UWAGA** 
+Kolejność postaci gracza musi odpowiadać kolejności indeksów z obiektu `BoardPlayerUpdateRequest`, podobnie jak w przypadku liczby kroków, liczba aktualizowanych postaci musi być równa liczbie indeksów, które otrzymaliśmy, w przeciwnym wypadku żadna z postaci nie zostanie zaktualizowana.   
+Aktualizacji można dokonać dowolną ilość razy w przeciągu 500 ms, silnik odczeka pełen interwał i dopiero pobierze listę ruchów.   
+Tutaj dobra wiadomość - jeśli wywołacie metodę `setValue` tuż przed końcem czasu to silnik zaczeka na jej wykonanie.   
+Nie polecałbym jednak częstego wykonywania np. w pętli, zawiera ona synchronizację wątków, więc w przypadku ciągłych wykonań możecie stracić dużo czasu. 
+
+<a name="env">
+
+# Środowisko 
+## Disclaimer
+
+Zakładam, że będziemy pracować na Linuxie (Ubuntu ?), jednak różne wersje mają różne kompilatory, a projekt wymaga  standardu C++17.  
+Ja korzystam z Clang, więc przygotowałem krótką instrukcję i skrypty do instalacji najnowszej wersji obsługującej ten standard, przygotowane i przetestowane były pod (L)Ubuntu.   
+
+Jeśli nie będziecie korzystać z przygotowanych przeze mnie skryptów itd, to poza C++17 silnik wymaga tych bibliotek zewnętrznych: 
+
+* SDL2
+* SDL2_gfx
+* SDL2_ttf 
+* SDL2_image
+
+Wszystkie z nich można znaleźć [tutaj](https://www.libsdl.org/index.php).
+Poza nimi, w Linuxie trzeba także dołączyć przy linkowaniu `-ldl -lpthread`, pierwsza z nich to dynamiczne ładowanie bibliotek a druga to wątki, nie znam odpowiedników na Windowsie. 
 
 Oczywiście możecie korzystać z innych narzędzi, nie wiem jednak jak wygląda wsparcie dla C++17 w GCC.   
 Jeśli chcecie natomiast pracować na Windowsie to VS2017 chyba wspiera już C++17. 
 
-## Krok po kroku
+
+Zalecałbym pracę na maszynie wirtualnej, przynajmniej na początku, testowałem skrypty i konfigurację kilka razy, ale zawsze czegoś mogłem nie uwzględnić.  
+Jeśli pojawią się problemy z użyciem skryptów automatycznych, to przygotuję gotowy obraz maszyny wirtualnej i ewentualnie gotowe binarki silnika (na Ubuntu), wtedy tylko będziecie musieli skompilować swoje funkcje. 
+
+<a name="conf">  
+
+## Konfiguracja środowiska
+
+<a name="auto">  
+
+### Automatyczna
+#### Wsparcie 
+
+1. Ubuntu 
+  * 14.04
+  * 15.10
+  * 16.04 
+  * 16.10 
+  * 17.04
+
+#### Krok po kroku 
+* Przechodzimy do folderu, do którego pobrane zostanie źródło i niezbędne narzędzia. 
+* Pobieramy plik [LLVM Setup](https://gist.githubusercontent.com/dmcyk/592a4b76c4199e7228ad1916a30db83d/raw/cbcb6642738d3b61324be0dbb02460de0e824788/setupLLVM.sh)
+* Po pobraniu należy dać mu uprawnienia do uruchomienia - `chmod +x setupLLVM.sh` i uruchomić (`./setupLLVM.sh`)
+* Następnie pobieramy skrypt [Engine autosetup](https://gist.githubusercontent.com/dmcyk/13d6888970c1cb0c470ca6f3107a8740/raw/195659ca2359a36c6f89271854436abd9ebeb5e8/MSIwG_setup.sh)
+* I tak samo jak w przypadku pierwszego skryptu nadajemy prawa i uruchamiamy. (Może to chwilę potrwać)
+* W folderze `engine/example` pojawi się skrypt `buildScript.sh` a w folderze `engine/source` skrypty `buildScript.sh` i `run.sh`
+
+<a name="manual">    
+    
+### Manualna
+
+#### Kompilacja przykładu klienta 
 
 **System**: Ubuntu  
 **Wersja**: 16.10 
@@ -24,12 +166,33 @@ W przypadku innych wersji, dystrybucji [tutaj](http://apt.llvm.org) można znale
 * Następnie  
 `sudo apt-get update`
 
-* Bibliotekę standardową należy skompilować oddzielnie gdyż obecnie nie ma pakietu dla wersji 4.0.  
+* Bibliotekę standardową należy skompilować oddzielnie gdyż obecnie nie ma pakietu dla wersji 4.0.  
 Uruchamiamy więc skrypt `clangSetup.sh`, domyślnie źródło zostanie pobrane do `~/Downloads`, można jednak jako pierwszy argument skryptu podać inną ściężkę. 
 Po wykonaniu skryptu, możemy usunąć folder `~/Downloads/LLVM/llvm`, trochę miejsca zajmuje, a potrzebujemy jedynie folderu `build`. 
 
 * Następnie pozostaje nam już tylko kompilacja.  
 Będąc w folderze `engine/example` w konsoli wpisujemy `CXX=clang++-4.0 cmake ./`.  
-Jeśli jednak kompilując bibliotekę standardową podaliśmy własną ścieżkę to tutaj także należy to zrobić - wtedy kompilacji możemy dokonać wpisując `CXX=clang++-4.0 cmake ./ -DLIBCXXPATH=/moja/sciezka`. Taka uwaga, tutaj podając ścieżkę nie możemy użyć znaku `~`, zamiast tego możemy jednak wpisać `$HOME` np. `-DLIBCXXPATH=$HOME/Dev`
+Jeśli jednak kompilując bibliotekę standardową podaliśmy własną ścieżkę to tutaj także należy to zrobić - wtedy kompilacji możemy dokonać wpisując `CXX=clang++-4.0 cmake ./ -DLIBCXXPATH=/moja/sciezka`. Taka uwaga, tutaj podając ścieżkę nie możemy użyć znaku `~`, zamiast tego możemy jednak wpisać `$HOME` np. `-DLIBCXXPATH=$HOME/Dev`
 
-* Jeśli wszystko poprawnie się wykonało, to teraz wystarczy uruchomić z konsoli polecenie `make` i nasz program zostanie skompilowany do biblioteki dynamicznej. 
+* Jeśli wszystko poprawnie się wykonało, to teraz wystarczy uruchomić z konsoli polecenie `make` i nasz program zostanie skompilowany do biblioteki dynamicznej. 
+
+#### Kompilacja silnika 
+
+**System**: Ubuntu  
+**Wersja**: 16.10 
+
+**Zakładam, że kroki kompilacji przykładowego klienta zostały już pomyślnie wykonane.**  
+
+* W folderze `engine` wykonać należy skrpyt `engineDependencies.sh`  
+* Jeśli wszystko poprawnie zostało wykonane, teraz już tylko należy skompilować projekt. { patrz dwa ostatnie punkty kompilacji klienta }   
+* Silnik możemy uruchomić przy pomocy skryptu `run.sh`, gdzie jako pierwszy argument należy podać ścieżkę standardowej biblioteki (o ile użyliśmy innej przy kompilacji klienta)
+
+
+<a name="launch">   
+
+## Uruchamianie 
+
+**Poprzez skrypt `run.sh`**
+
+* Domyślnie silnik zostanie uruchomiony z klientami działającymi w sposób losowy. W skrypcie uruchamiającym zakomentowana jest linia obrazująca sposób uruchomienia serwera z pierwszym graczem pochodzącym z wcześniej skompilowanego przykładu.   
+* Silnik można konfigurować - rozmiar planszy, gracze itd. aby zobaczyć listę opcję należy w skrypcie konfiguracyjnym odpowiednio linię `./GameEngine` przez `./GameEngine --help` 
