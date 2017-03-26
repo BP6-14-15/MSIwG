@@ -11,6 +11,6 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
-libclientA.so
+GameEngine
 buildScript.sh
 # End of https://www.gitignore.io/api/cmake

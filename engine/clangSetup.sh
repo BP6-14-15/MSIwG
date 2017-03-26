@@ -1,5 +1,6 @@
 #/bin/bash
-sudo apt-get install clang-4.0 lldb-4.0 lld-4.0 libc++-dev subversion cmake
+export DEBIAN_FRONTEND=noninteractive
+sudo apt-get -y install clang-4.0 lldb-4.0 lld-4.0 libc++-dev subversion cmake
 
 if [[ $? != 0 ]]; then
   echo "couldn't install dependencies... aborting"
