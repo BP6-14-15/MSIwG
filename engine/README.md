@@ -1,10 +1,22 @@
 #### Spis treści 
+* [Zmiany](#changes)
 * [Funkcja klienta](#clientFcn)  
 * [Środowisko](#env)
   * [Konfiguracja](#conf)
     * [Automatyczna](#auto)
     * [Manualna](#manual)
   * [Uruchamianie](#launch)
+  * [Binarka](#bin)
+
+<a name="changes">
+
+# Zmiany 
+
+## v0.2.1 
+
+Kompilacja funkcji klienta nie wymaga już standardu C++17, przygotowałem takżę gotową [binarkę](#bin) silnika. 
+Możecie więc skompilować swoje funkcje starszymi kompilatorami i nie musi to być `Clang`, możecie użyć `gcc`. 
+Na branchu [Exec](https://github.com/BP6-14-15/MSIwG/tree/Exec) w folderze `example`znajdują się skrypty do narzędzia `cmake` i do kompilacji (`build.sh`), których możecie użyć w przypadku korzystania z gotowej binarki. 
 
 <a name="clientFcn">  
 
@@ -196,3 +208,10 @@ Jeśli jednak kompilując bibliotekę standardową podaliśmy własną ścieżk�
 
 * Domyślnie silnik zostanie uruchomiony z klientami działającymi w sposób losowy. W skrypcie uruchamiającym zakomentowana jest linia obrazująca sposób uruchomienia serwera z pierwszym graczem pochodzącym z wcześniej skompilowanego przykładu.   
 * Silnik można konfigurować - rozmiar planszy, gracze itd. aby zobaczyć listę opcję należy w skrypcie konfiguracyjnym odpowiednio linię `./GameEngine` przez `./GameEngine --help` 
+
+<a name="bin">
+
+## Binarka 
+
+W zakładce `releases` GitHuba w wersji 0.2.1 możecie znaleźć binarkę przeznaczoną pod system Lubuntu 16.10 (na zwykłym Ubuntu 16.10 także powinno działać), można ją uruchomić bezpośrednio nawet z obrazu systemu bez instalacji. 
+
