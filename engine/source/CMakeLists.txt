@@ -25,7 +25,7 @@ FOREACH(subdir ${SUBDIRS})
     INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/src/${subdir}")
 ENDFOREACH()
 
-SET(LINKER_FLAGS "-lSDL2 -lSDL2_image -lSDL2_gfx -lSDL2_ttf -ldl -lpthread") 
+SET(LINKER_FLAGS "-ljbig -llzma -lwebp -ljpeg -lfreetype -ltiff -lz -lpng -lSDL2 -lSDL2_image -lSDL2_gfx -lSDL2_ttf -Wl,-Bdynamic -lgcc_s -ldl -lpthread -lrt -lX11 -lXext -lXcursor -lXinerama -lXi -lXrandr -lXss -lXxf86vm -lxkbcommon -lwayland-client -lwayland-cursor -lpulse-simple -lpulse -lsndio -lasound -Wl,--no-undefined -lwayland-egl") 
 
 SET(LIBCXXPATH "$ENV{HOME}/Downloads" CACHE STRING "path to installed libc++ using the installation script")
 
@@ -43,6 +43,6 @@ LINK_DIRECTORIES("${LIBCXXPATH}/LLVM/build/lib" )
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1z  -I${LIBCXXPATH}/LLVM/build/include/c++/v1 -nostdinc++")
 
-SET(LIBCXX_FLAGS "-stdlib=libc++ -L${LIBCXXPATH}/LLVM/build/lib -lc++abi -lc++ -nostdinc++")
+SET(LIBCXX_FLAGS "-L/usr/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/6.2.0 -L${LIBCXXPATH}/LLVM/build/lib -fuse-ld=lld -Wl,-Bstatic -lc++ -lc++abi")
 SET(CMAKE_EXE_LINKER_FLAGS "${LIBCXX_FLAGS} ${LINKER_FLAGS}")
 
