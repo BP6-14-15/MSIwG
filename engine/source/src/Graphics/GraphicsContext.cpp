@@ -10,7 +10,6 @@
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_image.h>
 #include <iostream>
-#include <sys/time.h>
 #include <chrono>
 #include <optional>
 #include "GraphicsContext.hpp"
@@ -39,9 +38,9 @@ void GraphicsCtx::enterMainLoop() {
         capTimer.start();
 
         //Handle events on queue
-        while( SDL_PollEvent( &e ) != 0 ) {
+        while (SDL_PollEvent(&e ) != 0 ) {
             //User requests quit
-            if( e.type == SDL_QUIT ){
+            if (e.type == SDL_QUIT ) {
                 isRunning = false;
             } else if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_RESIZED) {
                 SDL_GetWindowSize(window, &drawingCtx->screenWidth, &drawingCtx->screenHeight);
@@ -51,18 +50,18 @@ void GraphicsCtx::enterMainLoop() {
         }
         
         //Clear screen
-        SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
-        SDL_RenderClear( renderer );
+        SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+        SDL_RenderClear(renderer );
         stateMachine->drawActive();
 
         
-        SDL_RenderPresent( renderer );
+        SDL_RenderPresent(renderer );
         
         // limit rendering
         int frameTicks = capTimer.getTicks();
-        if( frameTicks < SCREEN_TICKS_PER_FRAME ){
+        if (frameTicks < SCREEN_TICKS_PER_FRAME ) {
             //Wait remaining time
-            SDL_Delay( SCREEN_TICKS_PER_FRAME - frameTicks );
+            SDL_Delay(SCREEN_TICKS_PER_FRAME - frameTicks );
         }
         
     }
@@ -71,8 +70,8 @@ void GraphicsCtx::enterMainLoop() {
 GraphicsCtx::~GraphicsCtx() {
     TTF_CloseFont(drawingCtx->textFont);
     TTF_CloseFont(drawingCtx->textFontBig);
-    SDL_DestroyRenderer( renderer );
-    SDL_DestroyWindow( window );
+    SDL_DestroyRenderer(renderer );
+    SDL_DestroyWindow(window );
     window = NULL;
     renderer = NULL;
     
@@ -94,8 +93,8 @@ bool GraphicsCtx::init(int screenMinWidth, int screenMinHeight) {
     this->window = SDL_CreateWindow("Police and criminal", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screenMinWidth, screenMinHeight, SDL_WINDOW_SHOWN + SDL_WINDOW_RESIZABLE );
     SDL_SetWindowMinimumSize(window, screenMinWidth, screenMinHeight);
     
-    if(window == NULL) {
-        printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
+    if (window == NULL) {
+        printf("Window could not be created! SDL Error: %s\n", SDL_GetError() );
         return false;
     }
     
@@ -108,16 +107,16 @@ bool GraphicsCtx::init(int screenMinWidth, int screenMinHeight) {
         return false;
     }
     
-    SDL_SetRenderDrawColor( renderer, 0xFF, 0xFF, 0xFF, 0xFF );
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF );
     
     int imgFlags = IMG_INIT_PNG;
-    if (!( IMG_Init( imgFlags ) & imgFlags ) ) {
-        printf( "SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
+    if (!(IMG_Init(imgFlags ) & imgFlags ) ) {
+        printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError() );
         return false;
     }
     
     if (TTF_Init() == -1) {
-        printf( "SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
+        printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError() );
         return false;
     }
     

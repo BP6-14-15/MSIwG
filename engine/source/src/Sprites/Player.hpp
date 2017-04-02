@@ -21,7 +21,6 @@ public:
     int boardSize;
     int id = 0; // 0 - criminal, no id
 
-    
     std::vector<CPGame::BoardMoveDirection> moveQueue;
     CPGame::PlayerType type;
     
@@ -33,11 +32,12 @@ public:
     }
     
     virtual void draw(Drawing::DrawingCtx& ctx, int squareSize) override;
-    virtual const std::vector<CPGame::BoardPosition>& update(GameCtx& ctx) override;
+    virtual const std::vector<CPGame::BoardPosition>& update(GameCtx& ctx, const PlayState& playState) override;
     virtual const std::vector<CPGame::BoardPosition>& getCoveredFields(GameCtx& ctx) override;
     virtual std::unique_ptr<BoardSprite> clone() const override {
         return std::unique_ptr<BoardSprite>(new Player(*this));
     }
 
+    void setCoveredField(const CPGame::BoardPosition& pos);
 };
 #endif /* Player_hpp */

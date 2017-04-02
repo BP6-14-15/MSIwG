@@ -39,8 +39,8 @@ public:
     CPGame::PlayerControllerCallback policemanUpdate;
     CPGame::PlayerControllerCallback criminalUpdate;
     
-    std::tuple<std::optional<CPGame::BoardPlayerUpdateResult>,
-    std::optional<CPGame::BoardPlayerUpdateResult>>
+    std::tuple<std::shared_ptr<CPGame::BoardPlayerUpdateResult>,
+    std::shared_ptr<CPGame::BoardPlayerUpdateResult>>
     makeRequest(const CPGame::Board&, const CPGame::BoardPlayerUpdateRequest& policemanReq,
                      const CPGame::BoardPlayerUpdateRequest& criminalReq);
     
@@ -80,6 +80,8 @@ public:
     GameUpdateManager updateManager;
     ColisionCtx colisionCtx;
 
+    
+    // firstPlayer starts as criminal 
     GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, CPGame::GameConfiguration gameConf);
     ~GameCtx();
     GameCtx(const GameCtx& cp) = delete;

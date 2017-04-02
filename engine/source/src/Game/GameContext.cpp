@@ -92,8 +92,8 @@ chrono::milliseconds waitForFuture(future<T>& fObj, const std::chrono::time_poin
 }
 
 tuple<
-    optional<CPGame::BoardPlayerUpdateResult>,
-    optional<CPGame::BoardPlayerUpdateResult>
+    shared_ptr<CPGame::BoardPlayerUpdateResult>,
+    shared_ptr<CPGame::BoardPlayerUpdateResult>
 >
 GameUpdateManager::makeRequest(
                                const Board& board,
@@ -102,12 +102,12 @@ GameUpdateManager::makeRequest(
 ) {
 
     auto policemanUpdatePromise = make_shared<CPGame::Promise<BoardPlayerUpdateResult>>();
-    optional<BoardPlayerUpdateResult> policemanUpdateResult = nullopt;
+    shared_ptr<BoardPlayerUpdateResult> policemanUpdateResult = nullptr;
     
 
     auto criminalUpdatePromise = make_shared<CPGame::Promise<BoardPlayerUpdateResult>>();
 
-    optional<BoardPlayerUpdateResult> criminalUpdateResult = nullopt;
+    shared_ptr<BoardPlayerUpdateResult> criminalUpdateResult = nullptr;
 
     auto start = chrono::high_resolution_clock::now();
     assert(policemanUpdate);

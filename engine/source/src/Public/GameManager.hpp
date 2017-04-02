@@ -15,10 +15,10 @@ namespace CPGame {
         
         // 20 is minimum
         int boardSize = 20;
-        int nPolice = 5;
-        int nGates = 2;
+        int nPolice = 5; // > 0
+        int nGates = 2; // > 1
         int wGates = 2;
-        int nWalls = 4;
+        int nWalls = 4; // > 1
         int lWalls = 4;
         
         // probability 0 - 100
@@ -27,7 +27,12 @@ namespace CPGame {
         int pGDC = 1; // probabilty of gate direction change
         int pWDC = 5; // - // - wall - // -
         
+        int clockLimit = 25; // T
+        
         std::optional<double> customSeed;
+        
+        void somefcn();
+
     };
     
     class GameManager {

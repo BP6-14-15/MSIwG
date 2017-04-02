@@ -75,8 +75,11 @@ int main(int argc, char* args[]) {
     printf("\tgate move probability: %.2f\n", double(conf.pGM) / 100);
     printf("\tgate direction change probability: %.2f\n", double(conf.pGDC) / 100);
     printf("\twall move probability: %.2f\n", double(conf.pWM) / 100);
-    printf("\twall direction change probability: %.2f\n\n", double(conf.pWDC) / 100);
+    printf("\twall direction change probability: %.2f\n", double(conf.pWDC) / 100);
+    if (conf.customSeed) {
+        printf("\tseed: %f\n\n", *conf.customSeed);
 
+    }
     try {
         CPGame::GameManager manager(src.player1, src.player2, conf);
         manager.start();

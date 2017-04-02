@@ -7,6 +7,8 @@
 //
 
 #include "Player.hpp"
+#include "Gate.hpp"
+#include "PlayState.hpp"
 
 using namespace CPGame;
 
@@ -29,14 +31,33 @@ Player::Player(Drawing::DrawingCtx& ctx, int id, BoardPosition pos, PlayerType t
 }
 
 void Player::draw(Drawing::DrawingCtx& ctx, int squareSize) {
-    if (type == PlayerType::criminal) {
-        SDL_SetRenderDrawColor(ctx.renderer, 33, 66, 99, 255);
-    } else {
-        SDL_SetRenderDrawColor(ctx.renderer, 255, 0, 0, 255);
-    }
-    
     int x = (pos.x - 1) * squareSize;
     int y = (pos.y - 1) * squareSize;
+
+    if (type == PlayerType::criminal) {
+        SDL_SetRenderDrawColor(ctx.renderer, 0, 0, 255, 255);
+    } else {
+        SDL_SetRenderDrawColor(ctx.renderer, 40, 50, 60, 255);
+        int halfSize = squareSize / 2;
+        int quarterSize = squareSize / 4;
+        int xx = x + squareSize + quarterSize;
+        int yy = y + quarterSize;
+        ctx.drawSDLRect({xx, yy, halfSize, halfSize});
+        
+        xx = x - halfSize - quarterSize;
+        ctx.drawSDLRect({xx, yy, halfSize, halfSize});
+
+        xx = x + quarterSize;
+        yy = y - halfSize - quarterSize;
+        ctx.drawSDLRect({xx, yy, halfSize, halfSize});
+
+        yy = y + squareSize + quarterSize;
+        ctx.drawSDLRect({xx, yy, halfSize, halfSize});
+        
+        SDL_SetRenderDrawColor(ctx.renderer, 255, 0, 0, 255);
+        
+    }
+    
     ctx.drawSDLWideRectFill({x, y, squareSize, squareSize}, 2);
     
     SDL_SetRenderTarget(ctx.renderer, nullptr);
@@ -47,7 +68,7 @@ void Player::draw(Drawing::DrawingCtx& ctx, int squareSize) {
 }
 
 
-const std::vector<BoardPosition>& Player::update(GameCtx& ctx) {
+const std::vector<BoardPosition>& Player::update(GameCtx& ctx, const PlayState& playState) {
     
     BoardMoveDirection dir;
 
@@ -110,29 +131,32 @@ const std::vector<BoardPosition>& Player::update(GameCtx& ctx) {
         if (pos.x > boardSize || pos.y > boardSize || pos.x < 1 || pos.y < 1) {
             // cant move to border
             return coveredFields;
-        } else if (pos.x == boardSize || pos.y == boardSize) {
-            // cant move next to gate
-            for (int i = ctx.cacheGateIndex; i < ctx.cachePlayerIndex; i++) {
-                auto& covered = ctx.stateCache[i];
-                for(auto& field: covered) {
-                    if ((field.x == boardSize + 1 && field.y == pos.y) || (field.y == boardSize + 1 && field.x == pos.x)) {
-                        // too close to gate
-                        return coveredFields;
-                    }
-                }
-            }
-        } else if (pos.x == 1 || pos.y == 1) {
-            // cant move next to gate
-            for (int i = ctx.cacheGateIndex; i < ctx.cachePlayerIndex; i++) {
-                auto& covered = ctx.stateCache[i];
-                for(auto& field: covered) {
-                    if ((field.x == 0 && field.y == pos.y) || (field.y == 0 && field.x == pos.x)) {
-                        // too close to gate
-                        return coveredFields;
-                    }
-                }
-            }
         }
+        
+//        
+//        else if (pos.x == boardSize || pos.y == boardSize) {
+//            // cant move next to gate
+//            for (int i = ctx.cacheGateIndex; i < ctx.cachePlayerIndex; i++) {
+//                auto& covered = ctx.stateCache[i];
+//                for(auto& field: covered) {
+//                    if ((field.x == boardSize + 1 && field.y == pos.y) || (field.y == boardSize + 1 && field.x == pos.x)) {
+//                        // too close to gate
+//                        return coveredFields;
+//                    }
+//                }
+//            }
+//        } else if (pos.x == 1 || pos.y == 1) {
+//            // cant move next to gate
+//            for (int i = ctx.cacheGateIndex; i < ctx.cachePlayerIndex; i++) {
+//                auto& covered = ctx.stateCache[i];
+//                for(auto& field: covered) {
+//                    if ((field.x == 0 && field.y == pos.y) || (field.y == 0 && field.x == pos.x)) {
+//                        // too close to gate
+//                        return coveredFields;
+//                    }
+//                }
+//            }
+//        }
     }
     
     this->pos = pos;
@@ -143,3 +167,7 @@ const std::vector<BoardPosition>& Player::getCoveredFields(GameCtx& ctx) {
     return coveredFields;
 }
 
+void Player::setCoveredField(const CPGame::BoardPosition &pos) {
+    this->pos = pos;
+    this->coveredFields = {pos};
+}

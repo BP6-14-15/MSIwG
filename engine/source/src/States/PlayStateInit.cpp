@@ -7,13 +7,14 @@
 //
 
 #include "PlayState.hpp"
+#include <assert.h>
 #include "Wall.hpp"
 #include "UIButton.hpp"
 #include "Gate.hpp"
 #include "Drawing.hpp"
 #include "GraphicsContext.hpp"
 #include "CPGame.hpp"
-#include <assert.h>
+#include "Utils.hpp"
 
 using namespace CPGame;
 using namespace std;
@@ -91,7 +92,7 @@ void PlayState::initBoard(const CPGame::GameConfiguration& gc) {
     }
         
     std::mt19937 randomGenerator(seed);
-    cout << "Board seed: " << seed << endl;
+    printf("Board seed: %f\n", seed);
     
     boardSprites.clear();
     playerSprites.clear();
@@ -105,7 +106,7 @@ void PlayState::initBoard(const CPGame::GameConfiguration& gc) {
         bool direction = rollDiceWithProbability(50, randomGenerator);
         pos.x = sizeRand(randomGenerator);
         pos.y = sizeRand(randomGenerator);
-        boardSprites.push_back(make_unique<Wall>(pos, direction ? BoardDirection::bottom : BoardDirection::right, BoardMoveDirection::right, 4, *gameCtx));
+        boardSprites.push_back(make_unique<Wall>(pos, direction ? BoardDirection::bottom : BoardDirection::right, BoardMoveDirection::right, gameCtx->gameConf.lWalls, *gameCtx));
         gameCtx->stateCache.push_back(boardSprites.back()->getCoveredFields(*gameCtx));
         
     }
@@ -129,11 +130,22 @@ void PlayState::initBoard(const CPGame::GameConfiguration& gc) {
             pos.y = sizeRand(randomGenerator);
             
             for(auto& playerSprite: playerSprites) {
-                if (pos == playerSprite->pos) {
-                    addedFlag = false;
-                    break;
+                vector<BoardPosition> fields;
+                
+                if (playerSprite->type == PlayerType::police && i != gc.nPolice + 1) {
+                    fields = CPGame::allSurroundings(playerSprite->pos); // all neighbour fields only for criminal
+                } else {
+                    fields.push_back(playerSprite->pos);
+                }
+                
+                for(auto& field: fields) {
+                    if (field == pos) {
+                        addedFlag = false;
+                        break;
+                    }
                 }
             }
+            
             for(int i = 0; i < gameCtx->cacheGateIndex; i++) {
                 auto& fields = boardSprites[i]->getCoveredFields(*gameCtx);
                 for(auto& field: fields) {

@@ -16,8 +16,11 @@
 #include "BoardSprite.hpp"
 #include "Player.hpp"
 #include "UIButton.hpp"
+#include "Gate.hpp"
 #include "CPGame.hpp"
 #include "PlayStateException.hpp"
+
+CPGame::GameConfiguration DefaultGameConfiguration();
 
 enum class PlayStateEvent {
     didRequestExit
@@ -44,7 +47,7 @@ struct PlayConfiguration {
 };
 
 class PlayState: public GameState {
-    const int UPDATE_INTERVAL = 60;
+    const int UPDATE_INTERVAL = 40;
     const int boardSquareMaxSize = 30;
     const Margins MARGINS = { 32, 32, 32, 200 };
     const int CLOCK_INTERVAL = 6; // one bigger than amount of required moves. -- one update is reserved for fetch and rendering of last move and
@@ -52,6 +55,11 @@ class PlayState: public GameState {
     int updateCounter = 0;
     int updateClock = CLOCK_INTERVAL - 1; // incremented prior to update, fetch moves at first update thus {interval - 1}
 
+    // NOTE: firstPlayer starts as criminal 
+    int firstPlayerPoints;
+    int secondPlayerPoints;
+    
+    void manualCleanup();
     
     std::shared_ptr<GameCtx> gameCtx = nullptr;
     
@@ -106,8 +114,8 @@ public:
     virtual void draw() override;
     virtual void handleEvent(const SDL_Event& e) override;
     std::function<void(const PlayStateEvent& e)> delegate;
+    std::vector<const Gate*> getGates() const;
     
 };
 
-CPGame::GameConfiguration DefaultGameConfiguration(); 
 #endif /* PlayState_hpp */

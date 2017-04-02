@@ -8,16 +8,28 @@
 
 
 #include "PlayState.hpp"
+#include <sstream>
 #include "Wall.hpp"
 #include "UIButton.hpp"
 #include "Gate.hpp"
 #include "Drawing.hpp"
 #include "GraphicsContext.hpp"
+#include "Utils.hpp"
 
 using namespace std;
 using namespace Drawing;
 using namespace CPGame;
 
+std::vector<const Gate*> PlayState::getGates() const {
+    vector<const Gate*> gates;
+    for(int i = gameCtx->cacheGateIndex; i < gameCtx->cachePlayerIndex; i++) {
+        auto ptr = boardSprites[i].get();
+        
+        auto gate = dynamic_cast<Gate*>(ptr);
+        gates.push_back(gate);
+    }
+    return gates;
+}
 
 void PlayState::nextPhase() {
     if (conf->currentPhase == PlayPhase::first) {
@@ -27,17 +39,18 @@ void PlayState::nextPhase() {
 
         conf->currentPhase = PlayPhase::second;
     } else if (conf->currentPhase == PlayPhase::second) {
-
-        const auto txt = u"Second round.";
+        std::stringstream txt;
+        txt << "Second round. First Player: " << firstPlayerPoints << ", Second Player: " << secondPlayerPoints;
         SDL_Color black = {0, 0, 0, 255};
-        resultTexture->loadFromRenderedText((uint16_t*)txt, black, drawingCtx.renderer, drawingCtx.textFontBig);
+        resultTexture->loadFromRenderedText(txt.str().c_str(), black, drawingCtx.renderer, drawingCtx.textFontBig);
         
         conf->currentPhase = PlayPhase::third;
         
     } else if (conf->currentPhase == PlayPhase::third) {
         boardStateCache.stateHistory.clear();
         gameCtx->updateManager.switchPlayers();
-
+        updateClock = CLOCK_INTERVAL - 1;
+        
         playerSprites = vector<unique_ptr<Player>>(make_move_iterator(conf->initialPlayerSprites.begin()), make_move_iterator(conf->initialPlayerSprites.end()));
         boardSprites = vector<unique_ptr<BoardSprite>>(make_move_iterator(conf->initialBoardSprites.begin()), make_move_iterator(conf->initialBoardSprites.end()));
         conf->initialPlayerSprites.clear();
@@ -51,9 +64,10 @@ void PlayState::nextPhase() {
         playerSprites.clear();
         boardSprites.clear();
         
-        const auto txt = u"The End. Click LMB or ESC.";
+        stringstream txt;
+        txt << "The End. Click LMB or ESC. First Player: " << firstPlayerPoints << ", Second Player: " << secondPlayerPoints;
         SDL_Color black = {0, 0, 0, 255};
-        resultTexture->loadFromRenderedText((uint16_t*)txt, black, drawingCtx.renderer, drawingCtx.textFontBig);
+        resultTexture->loadFromRenderedText(txt.str().c_str(), black, drawingCtx.renderer, drawingCtx.textFontBig);
 
         conf->currentPhase = PlayPhase::fifth;
     }
@@ -76,7 +90,7 @@ void PlayState::updatePlayers() {
 
     auto [policemanResponse, criminalResponse] = gameCtx->updateManager.makeRequest(boardStateCache, policeUpdateRequest, criminalUpdateRequest);
 //    auto end = chrono::high_resolution_clock::now();
-
+    
 //    std::cout << "" << chrono::duration_cast<chrono::milliseconds>(end - start).count() << std::endl;
 
     if (policemanResponse) {
@@ -142,10 +156,33 @@ void PlayState::populateBoardState() {
 void PlayState::update() {
     if (updateCounter > UPDATE_INTERVAL) {
         updateCounter = 0;
-        if (gameCtx->colisionCtx.thiefWasCaught || gameCtx->colisionCtx.thiefDidEscape) {
+        
+        int realClock = updateClock - CLOCK_INTERVAL + 1;
+        realClock = realClock - (realClock / 6); // remove difference caused by next step rendering
+
+        if (gameCtx->colisionCtx.thiefWasCaught || gameCtx->colisionCtx.thiefDidEscape || realClock == gameCtx->gameConf.clockLimit - 1) {
             // collision are checked further, but we still want to render position of policeman catching thief
-            //      or thief in the gate, so we still need one move update interval to render those positions
-            //      will report collision with next update
+            // or thief in the gate, so we still need one move update interval to render those positions
+            // will report collision with next update
+            
+            int criminalPoints = 0;
+            if (realClock == gameCtx->gameConf.clockLimit - 1) {
+                criminalPoints = gameCtx->gameConf.clockLimit;
+            } else if (gameCtx->colisionCtx.thiefDidEscape) {
+                criminalPoints = 2 * gameCtx->gameConf.clockLimit - realClock - 1;
+            } else if (gameCtx->colisionCtx.thiefWasCaught) {
+                criminalPoints = realClock;
+            }
+            
+            if (conf->currentPhase == PlayPhase::second) {
+                this->firstPlayerPoints = criminalPoints;
+                this->secondPlayerPoints = -criminalPoints;
+            } else {
+                this->firstPlayerPoints += -criminalPoints;
+                this->secondPlayerPoints += criminalPoints;
+                
+            }
+            
             nextPhase();
             gameCtx->colisionCtx.reset();
             return;
@@ -154,9 +191,9 @@ void PlayState::update() {
         updateClock += 1;
     
         
-        // reaching clock interval we fetch player moves
-        // similar method as with collision, first we make the last move, render it
-        // and then with following update we request moves, so we don't make any other updates 
+        // reaching clock interval - fetch player moves
+        // similar method as with collision, first we need to render the last move
+        // and then with following update we request moves, so we don't make any other updates at this point
         if ((updateClock % CLOCK_INTERVAL) == 0) {
             if (boardStateCache.stateHistory.size() > CLOCK_INTERVAL - 1) {
                 boardStateCache.stateHistory = vector<BoardState>(boardStateCache.stateHistory.end() - CLOCK_INTERVAL + 1,
@@ -169,12 +206,30 @@ void PlayState::update() {
         } else {
             int cacheIndex = 0;
             for(auto& sprite: boardSprites) {
-                gameCtx->stateCache[cacheIndex] = sprite->update(*gameCtx);
+                gameCtx->stateCache[cacheIndex] = sprite->update(*gameCtx, *this);
                 cacheIndex += 1;
                 
             }
+            
+            vector<BoardPosition> gatesNeighbourFields = {};
+            for(int i = gameCtx->cacheGateIndex; i < gameCtx->cachePlayerIndex; i++) {
+                auto gate = dynamic_cast<Gate*>(boardSprites[i].get());
+                auto neighbours = gate->boardNeighbourFields(*gameCtx);
+                gatesNeighbourFields.insert(gatesNeighbourFields.end(), neighbours.begin(), neighbours.end());
+            }
+            
             for(auto& sprite: playerSprites) {
-                gameCtx->stateCache[cacheIndex] = sprite->update(*gameCtx);
+                BoardPosition currentPos = sprite->pos;
+                
+                gameCtx->stateCache[cacheIndex] = sprite->update(*gameCtx, *this);
+                
+                if (sprite->type == PlayerType::police) {
+                    for(auto& gateNeighbourField: gatesNeighbourFields) {
+                        if (gateNeighbourField == sprite->pos) {
+                            sprite->setCoveredField(currentPos);
+                        }
+                    }
+                }
                 cacheIndex += 1;
                 
             }
@@ -182,12 +237,8 @@ void PlayState::update() {
             // check if criminal caught
             for(int i = 0; i < playerSprites.size() - 1; i++) {
                 const auto& sprite = playerSprites[i];
-                std::vector<BoardPosition> catchRange;
-                catchRange.push_back({sprite->pos.x, sprite->pos.y});
-                catchRange.push_back({sprite->pos.x + 1, sprite->pos.y});
-                catchRange.push_back({sprite->pos.x - 1, sprite->pos.y});
-                catchRange.push_back({sprite->pos.x, sprite->pos.y + 1});
-                catchRange.push_back({sprite->pos.x, sprite->pos.y - 1});
+
+                std::vector<BoardPosition> catchRange = CPGame::surroundings(sprite->pos);
                 
                 for(auto& otherSprite: playerSprites) {
                     if (otherSprite->type == PlayerType::criminal) {
@@ -237,7 +288,7 @@ void PlayState::draw() {
         update();
     }
 
-    drawingCtx.setDrawColor(0, 255, 0, 255);
+    drawingCtx.setDrawColor(22, 160, 130, 255);
     
     drawingCtx.pushStack(); // initial position
     

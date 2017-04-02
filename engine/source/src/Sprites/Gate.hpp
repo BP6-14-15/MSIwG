@@ -9,9 +9,7 @@
 #ifndef Gate_hpp
 #define Gate_hpp
 
-#include <stdio.h>
 #include <vector>
-#include <SDL2/SDL.h>
 #include "BoardSprite.hpp"
 
 class Gate: public BoardSprite {
@@ -26,13 +24,15 @@ public:
     ~Gate(); 
     
     // right - moving forward, bottom - backwards
-    virtual const std::vector<CPGame::BoardPosition>& update(GameCtx& ctx) override;
+    virtual const std::vector<CPGame::BoardPosition>& update(GameCtx& ctx, const PlayState& playState) override;
     virtual const std::vector<CPGame::BoardPosition>& getCoveredFields(GameCtx& ctx) override;
     
     void changeDirection();
     
     virtual void draw(Drawing::DrawingCtx& ctx, int squareSize) override;
     virtual std::unique_ptr<BoardSprite> clone() const override;
+    
+    std::vector<CPGame::BoardPosition> boardNeighbourFields(const GameCtx& ctx) const;
 
 };
 #endif /* Gate_hpp */
