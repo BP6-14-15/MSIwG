@@ -9,7 +9,7 @@
 #include "Gate.hpp"
 #include <vector>
 #include <random>
-
+#include <set>
 using namespace std;
 using namespace CPGame;
 
@@ -66,7 +66,7 @@ void Gate::updatePosition(const GameCtx& ctx) {
     }
 }
 
-const std::vector<CPGame::BoardPosition>& Gate::update(GameCtx& ctx) {
+const std::vector<CPGame::BoardPosition>& Gate::update(GameCtx& ctx, const PlayState& playState) {
     if (ctx.rollDiceWithProbability(ctx.gameConf.pGDC)) {
         changeDirection();
     }
@@ -84,7 +84,7 @@ const std::vector<CPGame::BoardPosition>& Gate::update(GameCtx& ctx) {
 }
 
 void Gate::draw(Drawing::DrawingCtx& ctx, int squareSize) {
-    SDL_SetRenderDrawColor( ctx.renderer, 255, 255, 255, 255 );
+    SDL_SetRenderDrawColor(ctx.renderer, 255, 255, 255, 255 );
 
     ctx.pushStack();
     ctx.translate({-squareSize, -squareSize}); // offset
@@ -123,5 +123,28 @@ void Gate::changeDirection()  {
     } else {
         dir = BoardDirection::right;
     }
+}
+
+vector<BoardPosition> Gate::boardNeighbourFields(const GameCtx& ctx) const {
+    int boardSize = ctx.gameConf.boardSize;
+    set<BoardPosition> neighbours;
+    for(auto& field: coveredFields) {
+        if ((field.y == 0 || field.y == boardSize + 1) && (field.x == 0 || field.x == boardSize + 1)) {
+            continue;
+        }
+        if (field.x == 0) {
+            neighbours.insert({1, field.y});
+        } else if (field.x == boardSize + 1) {
+            neighbours.insert({boardSize, field.y});
+        } else if (field.y == 0) {
+            neighbours.insert({field.x, 1});
+        } else {
+            neighbours.insert({field.x, boardSize});
+        }
+
+    }
+    vector<BoardPosition> res;
+    res.assign(neighbours.begin(), neighbours.end());
+    return res;
 }
 

@@ -10,25 +10,22 @@
 #define Promise_hpp
 #include <memory>
 #include <iostream>
-#include <optional>
-
 
 namespace CPGame {
 template<typename T>
 class Promise {
-    std::unique_ptr<std::optional<T>> underlying;
+    std::shared_ptr<T> underlying = nullptr;
     std::mutex dataMutex;
 public:
     
     Promise(const Promise&) = delete;
     
     Promise() {
-        underlying = std::make_unique<std::optional<T>>();
+        
     }
-    
-    std::optional<T> getValue() {
+    const std::shared_ptr<T> getValue() {
         std::lock_guard<std::mutex> lock(dataMutex);
-        return *underlying;
+        return underlying;
         
     }
     
@@ -36,7 +33,7 @@ public:
         std::unique_lock<std::mutex> lock(dataMutex, std::try_to_lock);
         
         if (lock.owns_lock()) {
-            *underlying = newData;
+            underlying = std::make_shared<T>(newData);
             return true;
         } else {
             return false;

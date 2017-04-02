@@ -15,7 +15,9 @@
 #include "GameContext.hpp"
 
 
-// spreading into direction
+class PlayState; 
+
+// spreading into direction - drawing
 enum class BoardDirection {
     right, bottom
 };
@@ -39,7 +41,7 @@ public:
     }
     
     virtual void draw(Drawing::DrawingCtx& ctx, int squareSize);
-    virtual const std::vector<CPGame::BoardPosition>& update(GameCtx& ctx) = 0;
+    virtual const std::vector<CPGame::BoardPosition>& update(GameCtx& ctx, const PlayState& playState) = 0;
     virtual const std::vector<CPGame::BoardPosition>& getCoveredFields(GameCtx& ctx) = 0;
     
     

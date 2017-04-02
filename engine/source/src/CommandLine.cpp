@@ -16,7 +16,7 @@ using namespace std;
 typedef void(*AnyFcn)();
 
 template <typename Signature>
-std::function<Signature> cast(AnyFcn f){
+std::function<Signature> cast(AnyFcn f) {
     return reinterpret_cast<Signature*>(f);
 }
 
@@ -67,6 +67,7 @@ PlayersSource::PlayersSource(CPGame::PlayerControllerCallback player1, CPGame::P
 
 void printUsage(const char* progName) {
     printf("Usage: %s [--longOption=value] [-sValue]\n\n", progName);
+    printf("Note:\nFirst player starts as a criminal.\n\n");
     printf("Options: \n");
     printf("-h | --help         Usage \n");
     
@@ -85,11 +86,13 @@ void printUsage(const char* progName) {
     printf("-o | --pGDC         Probability of gate direction change [0-100]\n");
     printf("-w | --pWM          Probability of wall move [0-100]\n");
     printf("-y | --pWDC         Probability of wall direction change [0-100]\n");
+    
+    printf("-r | --boardSeed    Custom board seed");
     printf("\n");
     
 }
 
-void parseArg(int argc, char* args[], CPGame::GameConfiguration& conf, PlayersSource& src) {
+void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& src) {
     int c;
     optional<string> firstPlayerLib;
     optional<string> firstPlayerFcn;
@@ -112,13 +115,15 @@ void parseArg(int argc, char* args[], CPGame::GameConfiguration& conf, PlayersSo
             {"fpFcnName", required_argument, 0, 'b'}, // first player lib path
             {"spLibPath", required_argument, 0, 'c'}, // second player lib path
             {"spFcnName", required_argument, 0, 'd'}, // first player lib path
+            {"boardSeed", required_argument, 0, 'r'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
+        
         /* getopt_long stores the option index here. */
         int option_index = 0;
         
-        c = getopt_long(argc, args, "ha:b:c:d:s:e:g:h:n:m:p:o:w:y:",
+        c = getopt_long(argc, args, "ha:b:c:d:s:e:g:h:n:r:m:p:o:w:y:",
                         long_options, &option_index);
         
         /* Detect the end of the options. */
@@ -138,6 +143,9 @@ void parseArg(int argc, char* args[], CPGame::GameConfiguration& conf, PlayersSo
             case 'h':
                 printUsage(args[0]);
                 exit(0);
+                break;
+            case 'r':
+                conf.customSeed = atof(optarg);
                 break;
             case 'a':
                 firstPlayerLib = string(optarg);

@@ -8,6 +8,7 @@
 
 #include "UIButton.hpp"
 #include <SDL2/SDL2_gfxPrimitives.h>
+
 UIButton::~UIButton() {
     delete txt;
     delete labelTexture;
@@ -47,7 +48,7 @@ void UIButton::setRect(const SDL_Rect &rect) {
 
 void UIButton::draw(Drawing::DrawingCtx& ctx) {
 
-    SDL_Rect s = {0,0,rect.w, 18};
+    SDL_Rect s = {0, 0, rect.w, 18};
 
     if (state == UIButtonState::clicked) {
         s.y += 21;
@@ -76,7 +77,7 @@ void UIButton::handleEvent(const SDL_Event& e) {
         if (state == UIButtonState::hover) {
             state = UIButtonState::clicked;
         }
-    } else if(e.type == SDL_MOUSEBUTTONUP && e.button.button == SDL_BUTTON_LEFT) {
+    } else if (e.type == SDL_MOUSEBUTTONUP && e.button.button == SDL_BUTTON_LEFT) {
         if (state == UIButtonState::clicked) {
             state = UIButtonState::hover;
             if (pushCallback) {

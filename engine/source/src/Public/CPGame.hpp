@@ -60,7 +60,8 @@ namespace CPGame {
         
     };
     
-    typedef std::function<void(std::shared_ptr<const Board>, BoardPlayerUpdateRequest, std::shared_ptr<Promise<BoardPlayerUpdateResult>> res)>PlayerControllerCallback;
+    
+    typedef std::function<void(std::shared_ptr<const Board>, BoardPlayerUpdateRequest, std::shared_ptr<Promise<BoardPlayerUpdateResult>> res)> PlayerControllerCallback;
     
 }
 

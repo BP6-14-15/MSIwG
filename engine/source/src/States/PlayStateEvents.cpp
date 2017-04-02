@@ -22,19 +22,26 @@ void PlayState::startBtnAction(UIButton& btn) {
         conf->initialPlayerSprites.push_back(unique_ptr<Player>(new Player(*playerSprite.get())));
     }
     
-    delete startButton;
-    startButton = nullptr;
-    delete reloadButton;
-    reloadButton = nullptr;
+    manualCleanup();
     
     nextPhase();
 }
 
 void PlayState::exit() {
+    if (conf->currentPhase == PlayPhase::first) {
+        manualCleanup();
+    }
     PlayStateEvent pe = PlayStateEvent::didRequestExit;
     if (delegate) {
         delegate(pe);
     }
+}
+
+void PlayState::manualCleanup() {
+    delete startButton;
+    startButton = nullptr;
+    delete reloadButton;
+    reloadButton = nullptr;
 }
 
 void PlayState::reloadBtnAction(UIButton& btn) {

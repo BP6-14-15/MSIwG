@@ -43,7 +43,7 @@ Wall::Wall(BoardPosition pos, BoardDirection dir, BoardMoveDirection moveDir, in
 
 
 void Wall::draw(Drawing::DrawingCtx& ctx, int squareSize) {
-    SDL_SetRenderDrawColor(ctx.renderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(ctx.renderer, 40, 50, 60, 255);
     BoardSprite::draw(ctx, squareSize);
 }
 
@@ -51,7 +51,7 @@ const std::vector<BoardPosition>& Wall::getCoveredFields(GameCtx& ctx) {
     return coveredFields;
 }
 
-const std::vector<BoardPosition>& Wall::update(GameCtx& ctx) {
+const std::vector<BoardPosition>& Wall::update(GameCtx& ctx, const PlayState& playState) {
     if (ctx.rollDiceWithProbability(ctx.gameConf.pWDC)) {
         switch (moveDir) {
             case BoardMoveDirection::left:

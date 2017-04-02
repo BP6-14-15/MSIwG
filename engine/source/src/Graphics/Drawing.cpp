@@ -120,7 +120,7 @@ namespace Drawing {
         SDL_SetRenderTarget(renderer, nullptr);
 
         //Render texture to screen
-        SDL_RenderCopyEx( renderer, txt.mTexture, clip, &txt.drawingRect, angle, center, flip );
+        SDL_RenderCopyEx(renderer, txt.mTexture, clip, &txt.drawingRect, angle, center, flip );
     }
     
     void DrawingCtx::drawTexture(const Texture& txt, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip) {
@@ -137,7 +137,7 @@ namespace Drawing {
         SDL_SetRenderTarget(renderer, nullptr);
         
         //Render texture to screen
-        SDL_RenderCopyEx( renderer, txt.mTexture, clip, &renderQuad, angle, center, flip );
+        SDL_RenderCopyEx(renderer, txt.mTexture, clip, &renderQuad, angle, center, flip );
     }
     
     void DrawingCtx::setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) {

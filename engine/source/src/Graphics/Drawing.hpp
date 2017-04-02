@@ -60,7 +60,6 @@ namespace Drawing {
         void drawTexture(const Texture& txt, SDL_Rect* clip = nullptr, double angle = 0, SDL_Point* center = nullptr, SDL_RendererFlip flip = SDL_FLIP_NONE);
         SDL_Point& getFromStack();
         
-        
         void setDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
         
 

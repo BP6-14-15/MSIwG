@@ -9,7 +9,7 @@
 #include "Timer.hpp"
 #include <SDL2/SDL.h>
 
-Timer::Timer(){
+Timer::Timer() {
     startTicks = 0;
     started = false;
 }

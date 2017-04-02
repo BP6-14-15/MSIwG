@@ -23,7 +23,7 @@ public:
         
     }
     
-    virtual const char* what() const throw (){
+    virtual const char* what() const throw () {
         switch (type) {
             case PlayStateExceptionType::incorrectConfiguration:
                 return "incorrectConfiguration";
