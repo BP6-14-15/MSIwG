@@ -19,8 +19,8 @@
 using namespace CPGame;
 using namespace std;
 
-CPGame::GameConfiguration DefaultGameConfiguration() {
-    CPGame::GameConfiguration gc;
+GameConfiguration DefaultGameConfiguration() {
+    GameConfiguration gc;
     return gc;
 }
 
@@ -77,7 +77,7 @@ PlayState::PlayState(std::shared_ptr<GraphicsCtx> ctx, std::shared_ptr<GameCtx> 
     
 }
 
-void PlayState::initBoard(const CPGame::GameConfiguration& gc) {
+void PlayState::initBoard(const GameConfiguration& gc) {
     BoardPosition pos = {1, 1};
     if (gc.nWalls <= 0 && gc.nPolice <= 0 && gc.nGates <= 0) {
         exception(PlayStateException(PlayStateExceptionType::incorrectConfiguration));
@@ -171,7 +171,7 @@ void PlayState::initBoard(const CPGame::GameConfiguration& gc) {
 }
 
 
-void PlayState::computeBoardPosition(const CPGame::GameConfiguration& gc) {
+void PlayState::computeBoardPosition(const GameConfiguration& gc) {
     int _w = (drawingCtx.screenWidth - MARGINS.left - MARGINS.right) / gc.boardSize;
     int _h = (drawingCtx.screenHeight - MARGINS.top - MARGINS.bottom ) / gc.boardSize;
     

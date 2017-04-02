@@ -62,7 +62,7 @@ int main(int argc, char* args[]) {
     randomGenerator = mt19937(r());
     PlayersSource src(updatePlayer, updatePlayer);
 
-    CPGame::GameConfiguration conf;
+    GameConfiguration conf;
     parseArg(argc, args, conf, src);
     
     printf("Configuration: \n");
@@ -81,7 +81,7 @@ int main(int argc, char* args[]) {
 
     }
     try {
-        CPGame::GameManager manager(src.player1, src.player2, conf);
+        GameManager manager(src.player1, src.player2, conf);
         manager.start();
 
     } catch (GameCtxException e) {

@@ -6,7 +6,6 @@
 //  Copyright © 2017 Damian Malarczyk. All rights reserved.
 //
 
-#include "CPGame.hpp"
 #include "GameManager.hpp"
 #include "GameContext.hpp"
 #include "GraphicsContext.hpp"
@@ -16,13 +15,12 @@ using namespace CPGame;
 shared_ptr<GameCtx> gameCtx;
 
 
-
-GameManager::GameManager(CPGame::PlayerControllerCallback firstPlayer,
-                         CPGame::PlayerControllerCallback secondPlayer,
-                         std::optional<CPGame::GameConfiguration> conf
+GameManager::GameManager(PlayerControllerCallback firstPlayer,
+                         PlayerControllerCallback secondPlayer,
+                         std::optional<GameConfiguration> conf
                          ) {
     if (!conf) {
-        conf = CPGame::GameConfiguration();
+        conf = GameConfiguration();
     }
     
     gameCtx = make_shared<GameCtx>(firstPlayer, secondPlayer, *conf);
@@ -39,3 +37,5 @@ void GameManager::start() {
     graphicsCtx->enterMainLoop();
     
 }
+
+

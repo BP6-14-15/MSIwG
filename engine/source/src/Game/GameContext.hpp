@@ -76,13 +76,13 @@ public:
     int cacheCriminalIndex;
     
     
-    const CPGame::GameConfiguration gameConf;
+    const GameConfiguration gameConf;
     GameUpdateManager updateManager;
     ColisionCtx colisionCtx;
 
     
     // firstPlayer starts as criminal 
-    GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, CPGame::GameConfiguration gameConf);
+    GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, const GameConfiguration& gameConf);
     ~GameCtx();
     GameCtx(const GameCtx& cp) = delete;
     

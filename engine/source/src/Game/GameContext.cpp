@@ -37,8 +37,8 @@ int rollProbabilityDice(std::mt19937& generator) {
 }
 
 
-GameCtx::GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, CPGame::GameConfiguration gameConf)
-:gameConf(gameConf) {
+GameCtx::GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, const GameConfiguration& gameConf)
+: gameConf(gameConf) {
     if (gameConf.boardSize < 20) {
         throw GameCtxException(GameCtxExceptionType::incorrectBoardSize);
     }

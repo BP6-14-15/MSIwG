@@ -20,7 +20,7 @@
 #include "CPGame.hpp"
 #include "PlayStateException.hpp"
 
-CPGame::GameConfiguration DefaultGameConfiguration();
+GameConfiguration DefaultGameConfiguration();
 
 enum class PlayStateEvent {
     didRequestExit
@@ -94,9 +94,9 @@ class PlayState: public GameState {
     CPGame::Board boardStateCache;
 
     
-    void initBoard(const CPGame::GameConfiguration& gc);
+    void initBoard(const GameConfiguration& gc);
     void update();
-    void computeBoardPosition(const CPGame::GameConfiguration& gc);
+    void computeBoardPosition(const GameConfiguration& gc);
 
     void reloadBtnAction(UIButton& btn);
     void startBtnAction(UIButton& btn);

@@ -92,7 +92,7 @@ void printUsage(const char* progName) {
     
 }
 
-void parseArg(int argc, char* args[], CPGame::GameConfiguration& conf, PlayersSource& src) {
+void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& src) {
     int c;
     optional<string> firstPlayerLib;
     optional<string> firstPlayerFcn;
