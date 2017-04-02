@@ -10,17 +10,24 @@
 #define Board_hpp
 
 #include <stdio.h>
+#include <vector>
+#include <ostream>
 
 namespace CPGame {
     
     struct BoardPosition {
-        int x,y;
+        int x, y;
         
         bool operator==(const BoardPosition& a) const {
             return (x == a.x && y == a.y);
-            
         }
+        
+        bool operator<(const BoardPosition& a) const {
+            return (x + y < a.x + a.y);
+        }
+        
     };
+    
 
     enum class PlayerType {
         police, criminal
@@ -30,5 +37,12 @@ namespace CPGame {
         left, top, right, bottom, none
     };
 }
+
+inline std::ostream& operator<<(std::ostream& stream, const CPGame::BoardPosition& pos) {
+    stream << "(" << pos.x << ", " << pos.y << ")";
+    return stream;
+}
+
+//std::ostream& operator<<(std::ostream& stream, const CPGame::BoardPosition& pos);
 
 #endif /* Board_hpp */

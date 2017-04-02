@@ -10,8 +10,6 @@
 #define Promise_hpp
 #include <memory>
 #include <iostream>
-#include <optional>
-
 
 namespace CPGame {
 template<typename T>
