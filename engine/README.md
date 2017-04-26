@@ -2,6 +2,7 @@
 * [Zmiany](#changes)
 * [Funkcja klienta](#clientFcn)  
 * [Środowisko](#env)
+  * [Disclaimer](#env_dsc)
   * [Konfiguracja](#conf)
     * [Automatyczna](#auto)
     * [Manualna](#manual)
@@ -46,7 +47,7 @@ struct BoardState {
     std::vector<BoardObject> objects;
 };
 ```
-Obecnie stan planszy to po prostu wektor wszystkich jej obiektów. 
+Stan planszy to po prostu wektor wszystkich jej obiektów. 
 
 ### `CPGame::BoardObject` 
 ```cpp
@@ -56,7 +57,7 @@ struct BoardObject {
     BoardObjectData data;
 };
 ```
-Obiekt planszy składa sie z wektoru zajmowanych pól na planszy - **ważne** - pola na planszy mogą mieć wartości <0, N + 1>, gdzie pola 0 i N + 1 to granice planszy, na nich poruszają się tylko bramy - no i złodziej o ile w danym miejscu jest brama, policjancji i ściany zajmować mogą jedynie pola z przedziału <1,N>.  
+Obiekt planszy składa sie z wektora zajmowanych pól - **ważne** - pola na planszy mogą mieć wartości <0, N + 1>, gdzie 0 i N + 1 to granice planszy, na nich poruszają się tylko bramy - bądź złodziej o ile w danym miejscu jest brama, policjancji i ściany zajmować mogą jedynie pola z przedziału <1,N>.  
 
 #### `CPGame::BoardObjectType`
 
@@ -92,7 +93,7 @@ struct BoardPlayerUpdateRequest {
 ```
 Obiekt ten to specyfikacja żądania aktualizacji gracza.  
 Wektor `objectIndexes` zawiera indeksy obiektów z wektora `object` obiektu `BoardState`, to właśnie tymi obiektami gracz może sterować.   
-Ważne jest aby trzymać się liczby żądanych ruchów (obecnie zawsze 5), jeśli liczba dostarczonych ruchów nie będzie się zgadzać to silnik zignoruje wszystkie z nich. 
+Ważne jest aby trzymać się liczby żądanych ruchów (obecnie zawsze 5), jeśli liczba zwróconych ruchów nie będzie się zgadzać to silnik zignoruje te dostarczone. 
 
 ## `shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>>`
 ```cpp
@@ -100,22 +101,25 @@ struct BoardPlayerUpdateResult {
     std::vector<std::vector<BoardMoveDirection>> moveDirection;
 };
 ```
-Poprzez ten obiekt dokonujemy aktualizacji postaci gracza, wystarczy na nim wyowałć metodę `setValue` z obiektem typu `CPGame::BoardPlayerUpdateResult`. Obiekt ten to dwuwymiarowy wektor, wiersze to postacie gracza, a kolumny to ich odpowiednie ruchy.   
+Poprzez ten obiekt dokonać można aktualizacji postaci gracza, wystarczy wyowałć jego metodę `setValue` z obiektem typu `CPGame::BoardPlayerUpdateResult`, gdzie obiekt ten to dwuwymiarowy wektor - wiersze to sterowane postacie, a kolumny to ich ruchy.   
 **UWAGA** 
 Kolejność postaci gracza musi odpowiadać kolejności indeksów z obiektu `BoardPlayerUpdateRequest`, podobnie jak w przypadku liczby kroków, liczba aktualizowanych postaci musi być równa liczbie indeksów, które otrzymaliśmy, w przeciwnym wypadku żadna z postaci nie zostanie zaktualizowana.   
 Aktualizacji można dokonać dowolną ilość razy w przeciągu 500 ms, silnik odczeka pełen interwał i dopiero pobierze listę ruchów.   
-Tutaj dobra wiadomość - jeśli wywołacie metodę `setValue` tuż przed końcem czasu to silnik zaczeka na jej wykonanie.   
+Tutaj dobra wiadomość - jeżeli wywołacie metodę `setValue` tuż przed końcem czasu to silnik zaczeka na jej wykonanie.   
 Nie polecałbym jednak częstego wykonywania np. w pętli, zawiera ona synchronizację wątków, więc w przypadku ciągłych wykonań możecie stracić dużo czasu. 
 
 <a name="env">
 
 # Środowisko 
+
+<a name="env_dsc">
+
 ## Disclaimer
 
-Zakładam, że będziemy pracować na Linuxie (Ubuntu ?), jednak różne wersje mają różne kompilatory, a projekt wymaga  standardu C++17.  
-Ja korzystam z Clang, więc przygotowałem krótką instrukcję i skrypty do instalacji najnowszej wersji obsługującej ten standard, przygotowane i przetestowane były pod (L)Ubuntu.   
+Zakładam, że będziemy pracować na Linuxie (Ubuntu ?), jednak różne wersje mają różne kompilatory, a silnik wymaga standardu C++17.  
+Ja korzystam z Clang, więc przygotowałem krótką instrukcję i skrypty do instalacji najnowszej wersji obsługującej ten standard, przygotowane i przetestowane były one pod (L)Ubuntu 16.10.   
 
-Jeśli nie będziecie korzystać z przygotowanych przeze mnie skryptów itd, to poza C++17 silnik wymaga tych bibliotek zewnętrznych: 
+Jeśli nie będziecie korzystać z przygotowanych przeze mnie skryptów itd, to poza C++17, silnik wymaga tych bibliotek zewnętrznych: 
 
 * SDL2
 * SDL2_gfx
@@ -125,9 +129,8 @@ Jeśli nie będziecie korzystać z przygotowanych przeze mnie skryptów itd, to 
 Wszystkie z nich można znaleźć [tutaj](https://www.libsdl.org/index.php).
 Poza nimi, w Linuxie trzeba także dołączyć przy linkowaniu `-ldl -lpthread`, pierwsza z nich to dynamiczne ładowanie bibliotek a druga to wątki, nie znam odpowiedników na Windowsie. 
 
-Oczywiście możecie korzystać z innych narzędzi, nie wiem jednak jak wygląda wsparcie dla C++17 w GCC.   
-Jeśli chcecie natomiast pracować na Windowsie to VS2017 chyba wspiera już C++17. 
-
+Oczywiście możecie korzystać z innych narzędzi, nie wiem jednak jak wygląda wsparcie dla C++17 w GCC, lub innych.   
+Jeśli chcecie natomiast pracować na Windowsie to VS2017 zdaje się wspiera już C++17. 
 
 Zalecałbym pracę na maszynie wirtualnej, przynajmniej na początku, testowałem skrypty i konfigurację kilka razy, ale zawsze czegoś mogłem nie uwzględnić.  
 Jeśli pojawią się problemy z użyciem skryptów automatycznych, to przygotuję gotowy obraz maszyny wirtualnej i ewentualnie gotowe binarki silnika (na Ubuntu), wtedy tylko będziecie musieli skompilować swoje funkcje. 
