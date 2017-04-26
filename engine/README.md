@@ -150,7 +150,7 @@ Jeśli pojawią się problemy z użyciem skryptów automatycznych, to przygotuj�
 
 #### Krok po kroku 
 * Przechodzimy do folderu, do którego pobrane zostanie źródło i niezbędne narzędzia. 
-* Pobieramy plik [LLVM Setup](https://gist.githubusercontent.com/dmcyk/592a4b76c4199e7228ad1916a30db83d/raw/cbcb6642738d3b61324be0dbb02460de0e824788/setupLLVM.sh)
+* Pobieramy plik [LLVM Setup](https://gist.githubusercontent.com/dmcyk/592a4b76c4199e7228ad1916a30db83d/raw/d0d05325689f1556d90318441c85383acfaa8710/setupLLVM.sh)
 * Po pobraniu należy dać mu uprawnienia do uruchomienia - `chmod +x setupLLVM.sh` i uruchomić (`./setupLLVM.sh`)
 * Następnie pobieramy skrypt [Engine autosetup](https://gist.githubusercontent.com/dmcyk/13d6888970c1cb0c470ca6f3107a8740/raw/195659ca2359a36c6f89271854436abd9ebeb5e8/MSIwG_setup.sh)
 * I tak samo jak w przypadku pierwszego skryptu nadajemy prawa i uruchamiamy. (Może to chwilę potrwać)
