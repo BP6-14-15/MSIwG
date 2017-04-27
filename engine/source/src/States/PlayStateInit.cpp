@@ -92,7 +92,7 @@ void PlayState::initBoard(const GameConfiguration& gc, bool reload) {
     gameCtx->resetGenerator();
     
     std::mt19937 randomGenerator(seed);
-    printf("Board seed: %u\n", seed);
+    cout << "Board seed: " << seed << endl; 
     
     boardSprites.clear();
     playerSprites.clear();

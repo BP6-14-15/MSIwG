@@ -78,7 +78,7 @@ int main(int argc, char* args[]) {
     printf("\tclock limit: %d\n", conf.clockLimit);
     
     if (conf.customSeed) {
-        printf("\tseed: %u\n", *conf.customSeed);
+        cout << "\tseed: " << *conf.customSeed << endl;
     }
     
     if (conf.customSeed && conf.applyCustomSeedToDefaultClient) {
