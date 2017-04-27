@@ -20,10 +20,12 @@ namespace CPGame {
         
         bool operator==(const BoardPosition& a) const {
             return (x == a.x && y == a.y);
+            
         }
         
         bool operator<(const BoardPosition& a) const {
             return (x + y < a.x + a.y);
+            
         }
         
     };
@@ -31,18 +33,20 @@ namespace CPGame {
 
     enum class PlayerType {
         police, criminal
+        
     };
 
     enum class BoardMoveDirection {
         left, top, right, bottom, none
+        
     };
 }
 
 inline std::ostream& operator<<(std::ostream& stream, const CPGame::BoardPosition& pos) {
     stream << "(" << pos.x << ", " << pos.y << ")";
     return stream;
+    
 }
 
-//std::ostream& operator<<(std::ostream& stream, const CPGame::BoardPosition& pos);
 
 #endif /* Board_hpp */

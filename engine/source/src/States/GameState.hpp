@@ -9,7 +9,6 @@
 #ifndef GameState_hpp
 #define GameState_hpp
 
-#include <stdio.h>
 #include "GraphicsContext.hpp"
 
 class GraphicsCtx;

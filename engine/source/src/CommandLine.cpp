@@ -9,6 +9,7 @@
 #include <getopt.h>
 #include <dlfcn.h>
 #include <functional>
+#include <iostream>
 #include "CommandLine.hpp"
 
 using namespace std;
@@ -86,9 +87,11 @@ void printUsage(const char* progName) {
     printf("-o | --pGDC         Probability of gate direction change [0-100]\n");
     printf("-w | --pWM          Probability of wall move [0-100]\n");
     printf("-y | --pWDC         Probability of wall direction change [0-100]\n");
+    printf("-t | --clock        Clock limit points");
     
     printf("-r | --boardSeed    Custom board seed");
-    printf("\n");
+    printf("-l | --applySeed    Flag | Apply custom board seed to default client function");
+    printf("\n\n");
     
 }
 
@@ -116,6 +119,8 @@ void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& sr
             {"spLibPath", required_argument, 0, 'c'}, // second player lib path
             {"spFcnName", required_argument, 0, 'd'}, // first player lib path
             {"boardSeed", required_argument, 0, 'r'},
+            {"clock", required_argument, 0, 't'},
+            {"applySeed", no_argument, 0, 'l'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
@@ -123,7 +128,7 @@ void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& sr
         /* getopt_long stores the option index here. */
         int option_index = 0;
         
-        c = getopt_long(argc, args, "ha:b:c:d:s:e:g:h:n:r:m:p:o:w:y:",
+        c = getopt_long(argc, args, "ha:b:c:d:s:e:g:h:n:r:m:p:o:w:y:t:l",
                         long_options, &option_index);
         
         /* Detect the end of the options. */
@@ -189,6 +194,12 @@ void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& sr
             case 'y':
                 conf.pWDC = atoi(optarg);
                 break;
+            case 't':
+                conf.clockLimit = atoi(optarg);
+                break;
+            case 'l':
+                conf.applyCustomSeedToDefaultClient = true;
+                break; 
             case '?':
                 /* getopt_long already printed an error message. */
                 break;

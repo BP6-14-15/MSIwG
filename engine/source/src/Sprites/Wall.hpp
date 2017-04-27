@@ -9,7 +9,6 @@
 #ifndef Wall_hpp
 #define Wall_hpp
 
-#include <stdio.h>
 #include <assert.h>
 #include "BoardSprite.hpp"
 

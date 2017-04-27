@@ -9,7 +9,6 @@
 #ifndef Texture_hpp
 #define Texture_hpp
 
-#include <stdio.h>
 #include <string>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>

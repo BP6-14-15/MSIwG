@@ -9,8 +9,8 @@
 #ifndef PlayStateException_hpp
 #define PlayStateException_hpp
 
-#include <stdio.h>
 #include <exception>
+
 enum class PlayStateExceptionType {
     incorrectConfiguration
 };
