@@ -13,8 +13,7 @@
 using namespace std;
 using namespace CPGame;
 
-random_device r;
-mt19937 randomGenerator(r());
+mt19937 randomGenerator;
 
 
 extern "C" {

@@ -9,10 +9,9 @@
 #ifndef SDLWideRect_hpp
 #define SDLWideRect_hpp
 
-#include <stdio.h>
 #include <vector>
-#include "Texture.hpp"
 #include <SDL2/SDL.h>
+#include "Texture.hpp"
 
 namespace Drawing {
     void drawWideRectFill(SDL_Renderer* renderer, int x, int y, int w, int h, int width);

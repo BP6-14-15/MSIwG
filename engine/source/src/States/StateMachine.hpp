@@ -9,8 +9,7 @@
 #ifndef StateMachine_hpp
 #define StateMachine_hpp
 
-#include <stdio.h>
-#include <map>
+#include <unordered_map>
 #include <assert.h>
 #include "GraphicsContext.hpp"
 
@@ -32,7 +31,7 @@ public:
 };
 
 class StateMachine {
-    std::map<std::string, std::shared_ptr<GameState>> activeStates;
+    std::unordered_map<std::string, std::shared_ptr<GameState>> activeStates;
     GameState* active;
     std::string activeName; 
     

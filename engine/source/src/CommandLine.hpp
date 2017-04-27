@@ -9,7 +9,6 @@
 #ifndef CommandLine_hpp
 #define CommandLine_hpp
 
-#include <stdio.h>
 #include "GameManager.hpp"
 
 struct PlayersSource {

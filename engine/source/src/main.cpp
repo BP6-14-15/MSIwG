@@ -17,10 +17,11 @@ using namespace CPGame;
 
 mt19937 randomGenerator;
 
-void updatePlayer(shared_ptr<const CPGame::Board> states,
+void updatePlayer(shared_ptr<const CPGame::Board> state,
                   CPGame::BoardPlayerUpdateRequest req,
                   shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>> promise
                   ) {
+    
     uniform_int_distribution<> d(1, 125);
     CPGame::BoardPlayerUpdateResult res;
     
@@ -58,8 +59,6 @@ void updatePlayer(shared_ptr<const CPGame::Board> states,
 }
 
 int main(int argc, char* args[]) {
-    random_device r;
-    randomGenerator = mt19937(r());
     PlayersSource src(updatePlayer, updatePlayer);
 
     GameConfiguration conf;
@@ -76,10 +75,23 @@ int main(int argc, char* args[]) {
     printf("\tgate direction change probability: %.2f\n", double(conf.pGDC) / 100);
     printf("\twall move probability: %.2f\n", double(conf.pWM) / 100);
     printf("\twall direction change probability: %.2f\n", double(conf.pWDC) / 100);
+    printf("\tclock limit: %d\n", conf.clockLimit);
+    
     if (conf.customSeed) {
-        printf("\tseed: %f\n\n", *conf.customSeed);
-
+        cout << "\tseed: " << *conf.customSeed << endl;
     }
+    
+    if (conf.customSeed && conf.applyCustomSeedToDefaultClient) {
+    
+        randomGenerator = mt19937(*conf.customSeed);
+    } else {
+        random_device r;
+        randomGenerator = mt19937(r());
+    }
+    
+    printf("\n");
+    
+    
     try {
         GameManager manager(src.player1, src.player2, conf);
         manager.start();
@@ -87,5 +99,8 @@ int main(int argc, char* args[]) {
     } catch (GameCtxException e) {
         cerr << "Error: " << e.what() << endl;
     }
+    
+    printf("\n");
+    
     return 0;
 }

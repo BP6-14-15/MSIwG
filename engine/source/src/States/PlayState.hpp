@@ -9,7 +9,6 @@
 #ifndef PlayState_hpp
 #define PlayState_hpp
 
-#include <stdio.h>
 #include <functional>
 #include <optional>
 #include "GameState.hpp"
@@ -94,7 +93,7 @@ class PlayState: public GameState {
     CPGame::Board boardStateCache;
 
     
-    void initBoard(const GameConfiguration& gc);
+    void initBoard(const GameConfiguration& gc, bool reload = false);
     void update();
     void computeBoardPosition(const GameConfiguration& gc);
 

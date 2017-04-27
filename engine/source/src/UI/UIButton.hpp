@@ -9,11 +9,9 @@
 #ifndef UIButton_hpp
 #define UIButton_hpp
 
-#include <stdio.h>
-#include <SDL2/SDL.h>
 #include <string>
 #include <functional>
-#include <optional>
+#include <SDL2/SDL.h>
 #include "UIObject.hpp"
 #include "Texture.hpp"
 

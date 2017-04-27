@@ -6,12 +6,11 @@
 //  Copyright © 2017 Damian Malarczyk. All rights reserved.
 //
 
+#include <iostream>
+#include <chrono>
 #include <SDL2/SDL2_gfxPrimitives.h>
 #include <SDL2/SDL_timer.h>
 #include <SDL2/SDL_image.h>
-#include <iostream>
-#include <chrono>
-#include <optional>
 #include "GraphicsContext.hpp"
 #include "Drawing.hpp"
 #include "PlayState.hpp"

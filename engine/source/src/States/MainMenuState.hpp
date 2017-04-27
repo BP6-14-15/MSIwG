@@ -9,7 +9,6 @@
 #ifndef MainMenuState_hpp
 #define MainMenuState_hpp
 
-#include <stdio.h>
 #include "GameState.hpp"
 #include "UIButton.hpp"
 #include "PlayState.hpp"

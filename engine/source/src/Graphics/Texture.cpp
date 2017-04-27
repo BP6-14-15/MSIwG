@@ -8,11 +8,10 @@
 
 #include "Texture.hpp"
 #include <string>
-#include <SDL2/SDL_image.h>
 #include <locale>
 #include <iostream>
 #include <codecvt>
-
+#include <SDL2/SDL_image.h>
 
 using namespace std;
 

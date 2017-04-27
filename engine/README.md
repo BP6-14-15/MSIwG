@@ -12,7 +12,9 @@
 <a name="changes">
 
 # Zmiany 
-
+## v0.3
+* Generalne usprawnienia
+* Przedziały indeksów poszczególnych typów obiektów w [stanie planszy](#board_states)
 ## v0.2.1 
 
 Kompilacja funkcji klienta nie wymaga już standardu C++17, przygotowałem takżę gotową [binarkę](#bin) silnika. 
@@ -32,14 +34,30 @@ void updatePlayer(shared_ptr<const CPGame::Board> states,
                   shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>> promise
 )
 ```
+
+<a name="board_states">
+
 ## `CPGame::Board` states 
 ```cpp
 struct Board {
-    std::vector<BoardState> stateHistory; // last is the actual
-    int boardSize; // board { n x n }        
-};
+        std::vector<BoardState> stateHistory; // last is the actual
+        int boardSize; // board { n x n }
+        
+        // wersja 0.3 
+        int firstGateIndex;
+        int firstPlayerIndex;
+        int criminalIndex;
+        
+    };
 ```
 Przechowuje on historię ostatnich 5 stanów planszy, oraz jej rozmiar (zawsze n x n). 
+
+**Wersja 0.3** wprowadza pola przedstawiające indeksy różnych typów obiektów, ich przedziały:
+
+* <0, firstGateIndex) - ściany
+* <firstGateIndex, firstPlayerIndex) - bramy
+* <firstPlayerIndex, criminalIndex) - policjanci
+* criminalIndex - indeks złodzieja
 
 ### `CPGame::BoardState` 
 ```cpp
@@ -155,7 +173,7 @@ Jeśli pojawią się problemy z użyciem skryptów automatycznych, to przygotuj�
 * Przechodzimy do folderu, do którego pobrane zostanie źródło i niezbędne narzędzia. 
 * Pobieramy plik [LLVM Setup](https://gist.githubusercontent.com/dmcyk/592a4b76c4199e7228ad1916a30db83d/raw/d0d05325689f1556d90318441c85383acfaa8710/setupLLVM.sh)
 * Po pobraniu należy dać mu uprawnienia do uruchomienia - `chmod +x setupLLVM.sh` i uruchomić (`./setupLLVM.sh`)
-* Następnie pobieramy skrypt [Engine autosetup](https://gist.githubusercontent.com/dmcyk/13d6888970c1cb0c470ca6f3107a8740/raw/195659ca2359a36c6f89271854436abd9ebeb5e8/MSIwG_setup.sh)
+* Następnie pobieramy skrypt [Engine autosetup](https://gist.githubusercontent.com/dmcyk/13d6888970c1cb0c470ca6f3107a8740/raw/87fb50b67a2c82da593b8b99c426eaa3a644865a/MSIwG_setup.sh)
 * I tak samo jak w przypadku pierwszego skryptu nadajemy prawa i uruchamiamy. (Może to chwilę potrwać)
 * W folderze `engine/example` pojawi się skrypt `buildScript.sh` a w folderze `engine/source` skrypty `buildScript.sh` i `run.sh`
 

@@ -77,22 +77,22 @@ PlayState::PlayState(std::shared_ptr<GraphicsCtx> ctx, std::shared_ptr<GameCtx> 
     
 }
 
-void PlayState::initBoard(const GameConfiguration& gc) {
+void PlayState::initBoard(const GameConfiguration& gc, bool reload) {
     BoardPosition pos = {1, 1};
     if (gc.nWalls <= 0 && gc.nPolice <= 0 && gc.nGates <= 0) {
         exception(PlayStateException(PlayStateExceptionType::incorrectConfiguration));
     }
-    double seed;
     
-    if (gc.customSeed) {
-        seed = *gc.customSeed;
-    } else {
+    uint_fast32_t seed = gameCtx->initialSeed;
+    if (reload) {
         random_device dev;
         seed = dev();
     }
-        
+    
+    gameCtx->resetGenerator();
+    
     std::mt19937 randomGenerator(seed);
-    printf("Board seed: %f\n", seed);
+    cout << "Board seed: " << seed << endl; 
     
     boardSprites.clear();
     playerSprites.clear();
@@ -168,6 +168,10 @@ void PlayState::initBoard(const GameConfiguration& gc) {
         
     }
     
+    boardStateCache.firstGateIndex = gameCtx->cacheGateIndex;
+    boardStateCache.firstPlayerIndex = gameCtx->cachePlayerIndex;
+    boardStateCache.criminalIndex = gameCtx->cacheCriminalIndex;
+
 }
 
 

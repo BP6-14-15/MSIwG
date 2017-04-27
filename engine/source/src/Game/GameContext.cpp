@@ -6,17 +6,6 @@
 //  Copyright © 2017 Damian Malarczyk. All rights reserved.
 //
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <string>
-#include <stdlib.h>
-#include <iostream>
-#include <cmath>
-#include <ctime>
-#include <iostream>
-#include <string>
-#include <thread>
-#include <optional>
 #include <random>
 #include "GameContext.hpp"
 #include "GraphicsContext.hpp"
@@ -57,8 +46,14 @@ GameCtx::GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerCon
         
     }
     
-    random_device device;
-    randomGenerator = mt19937(device());
+    if (gameConf.customSeed) {
+        initialSeed = *gameConf.customSeed;
+    } else {
+        random_device device;
+        initialSeed = device();
+
+    }
+    randomGenerator = mt19937(initialSeed);
     updateManager.criminalUpdate = firstPlayer;
     updateManager.policemanUpdate = secondPlayer;
 }
@@ -66,6 +61,10 @@ GameCtx::GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerCon
 
 GameCtx::~GameCtx() {
     
+}
+
+void GameCtx::resetGenerator() {
+    randomGenerator = mt19937(initialSeed);
 }
 
 void GameUpdateManager::switchPlayers() {

@@ -131,7 +131,11 @@ void PlayState::populateBoardState() {
     int cacheIndex = 0;
     for(; cacheIndex < gameCtx->cachePlayerIndex; cacheIndex++) {
         BoardObject bObj;
-        
+        if (cacheIndex < gameCtx->cacheGateIndex) {
+            bObj.type = BoardObjectType::wall;
+        } else {
+            bObj.type = BoardObjectType::gate;
+        }
         bObj.coveredFields = gameCtx->stateCache[cacheIndex];
         boardState.objects.push_back(bObj);
         
@@ -219,17 +223,24 @@ void PlayState::update() {
             }
             
             for(auto& sprite: playerSprites) {
-                BoardPosition currentPos = sprite->pos;
+//                BoardPosition currentPos = sprite->pos;
+
                 
                 gameCtx->stateCache[cacheIndex] = sprite->update(*gameCtx, *this);
                 
-                if (sprite->type == PlayerType::police) {
-                    for(auto& gateNeighbourField: gatesNeighbourFields) {
-                        if (gateNeighbourField == sprite->pos) {
-                            sprite->setCoveredField(currentPos);
-                        }
-                    }
-                }
+//                limiting police not to stand next to gate
+//                not using it currently
+//                
+//                
+//
+//                if (sprite->type == PlayerType::police) {
+//                    for(auto& gateNeighbourField: gatesNeighbourFields) {
+//                        if (gateNeighbourField == sprite->pos) {
+//                            sprite->setCoveredField(currentPos);
+//                        }
+//                    }
+//                }
+                
                 cacheIndex += 1;
                 
             }

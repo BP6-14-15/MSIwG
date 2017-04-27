@@ -8,8 +8,8 @@
 
 #ifndef Promise_hpp
 #define Promise_hpp
+
 #include <memory>
-#include <iostream>
 #include <mutex>
 
 namespace CPGame {
@@ -24,6 +24,7 @@ public:
     Promise() {
         
     }
+    
     const std::shared_ptr<T> getValue() {
         std::lock_guard<std::mutex> lock(dataMutex);
         return underlying;
