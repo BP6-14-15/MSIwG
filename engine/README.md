@@ -173,7 +173,7 @@ Jeśli pojawią się problemy z użyciem skryptów automatycznych, to przygotuj�
 * Przechodzimy do folderu, do którego pobrane zostanie źródło i niezbędne narzędzia. 
 * Pobieramy plik [LLVM Setup](https://gist.githubusercontent.com/dmcyk/592a4b76c4199e7228ad1916a30db83d/raw/d0d05325689f1556d90318441c85383acfaa8710/setupLLVM.sh)
 * Po pobraniu należy dać mu uprawnienia do uruchomienia - `chmod +x setupLLVM.sh` i uruchomić (`./setupLLVM.sh`)
-* Następnie pobieramy skrypt [Engine autosetup](https://gist.githubusercontent.com/dmcyk/13d6888970c1cb0c470ca6f3107a8740/raw/87fb50b67a2c82da593b8b99c426eaa3a644865a/MSIwG_setup.sh)
+* Następnie pobieramy skrypt [Engine autosetup](https://gist.githubusercontent.com/dmcyk/13d6888970c1cb0c470ca6f3107a8740/raw/32627afe5c419812b3fdef77b7d54f997044cebe/MSIwG_setup.sh)
 * I tak samo jak w przypadku pierwszego skryptu nadajemy prawa i uruchamiamy. (Może to chwilę potrwać)
 * W folderze `engine/example` pojawi się skrypt `buildScript.sh` a w folderze `engine/source` skrypty `buildScript.sh` i `run.sh`
 
