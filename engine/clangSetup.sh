@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 errLogPath=".err.log"
 exec 3>&1
 exec > /dev/null 2> $errLogPath
