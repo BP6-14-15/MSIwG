@@ -66,3 +66,4 @@ checkExit
 make cxx 
 
 echoStd "Done installing clang"
+close
