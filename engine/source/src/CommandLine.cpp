@@ -87,9 +87,9 @@ void printUsage(const char* progName) {
     printf("-o | --pGDC         Probability of gate direction change [0-100]\n");
     printf("-w | --pWM          Probability of wall move [0-100]\n");
     printf("-y | --pWDC         Probability of wall direction change [0-100]\n");
-    printf("-t | --clock        Clock limit points");
+    printf("-t | --clock        Clock limit points\n");
     
-    printf("-r | --boardSeed    Custom board seed");
+    printf("-r | --boardSeed    Custom board seed\n");
     printf("-l | --applySeed    Flag | Apply custom board seed to default client function");
     printf("\n\n");
     
