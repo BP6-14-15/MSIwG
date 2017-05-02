@@ -10,8 +10,8 @@
 #define GameManager_h
 
 #include <optional>
+#include <inttypes.h>
 #include "CPGame.hpp"
-
 
 struct GameConfiguration {
     
@@ -29,9 +29,10 @@ struct GameConfiguration {
     int pGDC = 1; // probabilty of gate direction change
     int pWDC = 5; // - // - wall - // -
     
-    int clockLimit = 25; // T
+    int clockLimit = 100; // T
     
-    std::optional<double> customSeed = std::nullopt;
+    std::optional<uint_fast32_t> customSeed = std::nullopt;
+    bool applyCustomSeedToDefaultClient = false;
     
     void somefcn();
     

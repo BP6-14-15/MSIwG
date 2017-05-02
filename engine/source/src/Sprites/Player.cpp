@@ -132,37 +132,14 @@ const std::vector<BoardPosition>& Player::update(GameCtx& ctx, const PlayState& 
             // cant move to border
             return coveredFields;
         }
-        
-//        
-//        else if (pos.x == boardSize || pos.y == boardSize) {
-//            // cant move next to gate
-//            for (int i = ctx.cacheGateIndex; i < ctx.cachePlayerIndex; i++) {
-//                auto& covered = ctx.stateCache[i];
-//                for(auto& field: covered) {
-//                    if ((field.x == boardSize + 1 && field.y == pos.y) || (field.y == boardSize + 1 && field.x == pos.x)) {
-//                        // too close to gate
-//                        return coveredFields;
-//                    }
-//                }
-//            }
-//        } else if (pos.x == 1 || pos.y == 1) {
-//            // cant move next to gate
-//            for (int i = ctx.cacheGateIndex; i < ctx.cachePlayerIndex; i++) {
-//                auto& covered = ctx.stateCache[i];
-//                for(auto& field: covered) {
-//                    if ((field.x == 0 && field.y == pos.y) || (field.y == 0 && field.x == pos.x)) {
-//                        // too close to gate
-//                        return coveredFields;
-//                    }
-//                }
-//            }
-//        }
+
     }
     
     this->pos = pos;
     coveredFields = {pos}; 
     return coveredFields;
 }
+
 const std::vector<BoardPosition>& Player::getCoveredFields(GameCtx& ctx) {
     return coveredFields;
 }

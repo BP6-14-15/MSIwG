@@ -10,10 +10,8 @@
 #define Context_hpp
 
 #include <SDL2/SDL.h>
-#include <stdio.h>
 #include <vector>
 #include <random>
-#include <functional>
 #include "StateMachine.hpp"
 #include "GameContext.hpp"
 #include "Drawing.hpp"

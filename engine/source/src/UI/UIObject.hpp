@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include "Drawing.hpp"
+
 class UIObject {
 public:
 
@@ -20,4 +21,5 @@ public:
     
     virtual void draw(Drawing::DrawingCtx& ctx) = 0;
 };
+
 #endif /* UIObject_hpp */

@@ -9,8 +9,6 @@
 #ifndef Timer_hpp
 #define Timer_hpp
 
-
-#include <stdio.h>
 #include <inttypes.h>
 
 class Timer{

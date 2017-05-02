@@ -35,6 +35,7 @@ namespace CPGame {
         std::vector<BoardPosition> coveredFields; // x, y - < 0, n + 1>
         BoardObjectType type;
         BoardObjectData data;
+        
     };
     
     struct BoardState {
@@ -45,6 +46,14 @@ namespace CPGame {
     struct Board {
         std::vector<BoardState> stateHistory; // last is the actual
         int boardSize; // board { n x n }
+        
+        // <0, firstGateIndex) : walls
+        // <firstGateIndex, firstPlayerIndex) - gates
+        // <firstPlayerIndex, criminalIndex) - police
+        // criminalIndex - criminal
+        int firstGateIndex;
+        int firstPlayerIndex;
+        int criminalIndex;
         
     };
     

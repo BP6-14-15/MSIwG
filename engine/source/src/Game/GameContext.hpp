@@ -9,14 +9,8 @@
 #ifndef GameContext_hpp
 #define GameContext_hpp
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string>
-#include <optional>
 #include <random>
-#include <functional>
 #include <future>
-#include <iostream>
 #include "GameManager.hpp"
 #include "GameCtxException.hpp"
 #include "Board.hpp"
@@ -63,6 +57,7 @@ class GameCtx: public std::enable_shared_from_this<GameCtx> {
 
 public:
     std::mt19937 randomGenerator;
+    uint_fast32_t initialSeed; 
     std::vector<std::vector<CPGame::BoardPosition>> stateCache;
     
     // stateCache indexes
@@ -85,6 +80,9 @@ public:
     GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, const GameConfiguration& gameConf);
     ~GameCtx();
     GameCtx(const GameCtx& cp) = delete;
+    
+    
+    void resetGenerator(); 
     
     // [0 - 100]
     inline bool rollDiceWithProbability(int prob) {

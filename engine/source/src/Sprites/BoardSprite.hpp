@@ -9,7 +9,6 @@
 #ifndef BoardSprite_hpp
 #define BoardSprite_hpp
 
-#include <stdio.h>
 #include <assert.h>
 #include "Drawing.hpp"
 #include "GameContext.hpp"

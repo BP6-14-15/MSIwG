@@ -45,7 +45,7 @@ void PlayState::manualCleanup() {
 }
 
 void PlayState::reloadBtnAction(UIButton& btn) {
-    initBoard(gameCtx->gameConf);
+    initBoard(gameCtx->gameConf, true);
     
 }
 

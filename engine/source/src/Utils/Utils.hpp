@@ -8,6 +8,7 @@
 
 #ifndef Utils_h
 #define Utils_h
+
 #include <vector>
 #include <iostream>
 #include "Board.hpp"
