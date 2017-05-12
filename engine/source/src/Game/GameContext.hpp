@@ -11,6 +11,10 @@
 
 #include <random>
 #include <future>
+#include <stdio.h>
+#include <fcntl.h>
+#include <iostream>
+#include <sys/wait.h>
 #include "GameManager.hpp"
 #include "GameCtxException.hpp"
 #include "Board.hpp"
@@ -20,25 +24,32 @@ bool rollDiceWithProbability(int prob, std::mt19937& generator);
 
 int rollProbabilityDice(std::mt19937& generator);
 
+enum class GameRound {
+    first, second
+};
+
 class GameUpdateManager {
     friend class GameCtx;
     
-    GameUpdateManager() {
-        
-    }
+    GameUpdateManager(std::shared_ptr<GameRemotePlayer> firstPlayerUpdate, std::shared_ptr<GameRemotePlayer> secondPlayerUpdate);
     
 public:
     GameUpdateManager(const GameUpdateManager&) = delete;
+    ~GameUpdateManager();
     
-    CPGame::PlayerControllerCallback policemanUpdate;
-    CPGame::PlayerControllerCallback criminalUpdate;
+    int _devNullDescriptor;
+    const std::shared_ptr<GameRemotePlayer> secondPlayerUpdate;
+    const std::shared_ptr<GameRemotePlayer> firstPlayerUpdate;
+    
+    std::shared_ptr<GameRemotePlayer> activeCriminalUpdate;
+    std::shared_ptr<GameRemotePlayer> activePoliceUpdate;
     
     std::tuple<std::shared_ptr<CPGame::BoardPlayerUpdateResult>,
     std::shared_ptr<CPGame::BoardPlayerUpdateResult>>
     makeRequest(const CPGame::Board&, const CPGame::BoardPlayerUpdateRequest& policemanReq,
-                     const CPGame::BoardPlayerUpdateRequest& criminalReq);
+                     const CPGame::BoardPlayerUpdateRequest& criminalReq, bool lockSTDOutput);
     
-    void switchPlayers();
+    void setActivePlayersForRound(GameRound round);
     
 };
 
@@ -67,7 +78,7 @@ public:
     int cacheGateIndex;
     // all none players sprites are first in stateCache
     int cachePlayerIndex;
-    // criminal actually always last
+    // criminal always last
     int cacheCriminalIndex;
     
     
@@ -77,7 +88,7 @@ public:
 
     
     // firstPlayer starts as criminal 
-    GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, const GameConfiguration& gameConf);
+    GameCtx(std::shared_ptr<GameRemotePlayer> firstPlayer, std::shared_ptr<GameRemotePlayer> secondPlayer, const GameConfiguration& gameConf);
     ~GameCtx();
     GameCtx(const GameCtx& cp) = delete;
     

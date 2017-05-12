@@ -17,6 +17,13 @@ mt19937 randomGenerator;
 
 
 extern "C" {
+    
+    const char* gameEnginePlayerSignature(void) {
+        return "Example signature";
+        
+    }
+    
+    
     void updatePlayer(shared_ptr<const Board> states,
                       BoardPlayerUpdateRequest req,
                       shared_ptr<Promise<BoardPlayerUpdateResult>> promise

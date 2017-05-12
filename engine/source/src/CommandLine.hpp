@@ -15,10 +15,10 @@ struct PlayersSource {
     void* firstPlayerLib = nullptr;
     void* secondPlayerLib = nullptr;
     
-    CPGame::PlayerControllerCallback player1;
-    CPGame::PlayerControllerCallback player2;
+    std::shared_ptr<GameRemotePlayer> player1;
+    std::shared_ptr<GameRemotePlayer> player2;
         
-    PlayersSource(CPGame::PlayerControllerCallback player1, CPGame::PlayerControllerCallback player2);
+    PlayersSource(std::shared_ptr<GameRemotePlayer> player1, std::shared_ptr<GameRemotePlayer> player2);
     ~PlayersSource();
     
 };

@@ -12,6 +12,15 @@
 <a name="changes">
 
 # Zmiany 
+## v0.4 
+* Każdy klient musi implementować nową funkcję o nazwie `gameEnginePlayerSignature` i sygnaturze `const char*(void)` - funkcja ta wykorzystywana jest do identyfikacji i weryfikacji poprawnego podłączenia biblioteki.
+* Domyślnie w czasie 500 ms oczekiwania na kolejne ruchy wyłączona jest możliwość wysyłania do `stdout` (printf, cout), `stderr` pozostaje jednak otwarte.   
+Dzięki temu można łatwiej sprawdzać czy silnik poprawnie odbiera zadane dane.   
+Przy testowaniu funkcji za pomocą flagi `--clientsPrint` można pozostawić `stdout` otwartym. 
+* Nowa flaga `--printsDirs`, gdy aktywna silnik będzie w konsoli wypisywał bezpośrednio otrzymane od klientów zadane ruchy. 
+* Jeżeli funkcja drugiego gracza korzysta z tej samej biblioteki co funkcja pierwszego, to wystarczy jako argument opcji `--spLibPath` podać `-`, w takim wypadku jeżeli nazwa funkcji drugiego gracza nie będzie wyraźnie dana (`--spFcnName`) to gracz drugi będzie korzystał z tej samej funkcji co pierwszy. 
+* Bramy i ściany także w rundzie drugiej korzystają z tego samego seeda.
+
 ## v0.3
 * Generalne usprawnienia
 * Przedziały indeksów poszczególnych typów obiektów w [stanie planszy](#board_states)

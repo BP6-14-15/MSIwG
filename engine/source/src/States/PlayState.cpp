@@ -9,6 +9,7 @@
 
 #include "PlayState.hpp"
 #include <sstream>
+#include <algorithm>
 #include "Wall.hpp"
 #include "UIButton.hpp"
 #include "Gate.hpp"
@@ -38,6 +39,10 @@ void PlayState::nextPhase() {
         populateBoardState();
 
         conf->currentPhase = PlayPhase::second;
+        gameCtx->updateManager.setActivePlayersForRound(GameRound::first);
+        
+        gameCtx->resetGenerator();
+        
     } else if (conf->currentPhase == PlayPhase::second) {
         std::stringstream txt;
         txt << "Second round. First Player: " << firstPlayerPoints << ", Second Player: " << secondPlayerPoints;
@@ -46,9 +51,11 @@ void PlayState::nextPhase() {
         
         conf->currentPhase = PlayPhase::third;
         
+        gameCtx->updateManager.setActivePlayersForRound(GameRound::first);
+        
     } else if (conf->currentPhase == PlayPhase::third) {
         boardStateCache.stateHistory.clear();
-        gameCtx->updateManager.switchPlayers();
+        gameCtx->updateManager.setActivePlayersForRound(GameRound::second);
         updateClock = CLOCK_INTERVAL - 1;
         
         playerSprites = vector<unique_ptr<Player>>(make_move_iterator(conf->initialPlayerSprites.begin()), make_move_iterator(conf->initialPlayerSprites.end()));
@@ -56,7 +63,7 @@ void PlayState::nextPhase() {
         conf->initialPlayerSprites.clear();
         conf->initialBoardSprites.clear();
         populateBoardState();
-
+        gameCtx->resetGenerator();
 
         conf->currentPhase = PlayPhase::fourth;
         
@@ -73,6 +80,40 @@ void PlayState::nextPhase() {
     }
 }
 
+void PlayState::controlPlayersUpdate(BoardPlayerUpdateRequest& request, shared_ptr<CPGame::BoardPlayerUpdateResult> response, const std::string& name) {
+    if (response) {
+        if (gameCtx->gameConf.printsMoveDirections) {
+            cout << "Received " << name << " moves: \n";
+            cout << response->moveDirection << endl;
+            
+        }
+        
+        if (response->moveDirection.size() != request.objectIndexes.size()) {
+            cout << "Client function error, incorrect amount of moves received for " << name << endl;
+            cout << "\tExpected: " << request.objectIndexes.size() << ", got: " << response->moveDirection.size() << endl;
+            
+        } else {
+            int i = 0;
+            for(auto& directions: response->moveDirection) {
+                if (directions.size() != request.numberOfMovesRequired) {
+                    cout << "Incorrect amount of " << name << " moves received for object with index: " << request.objectIndexes[i] << endl;
+                    cout << "\tExpected: " << request.numberOfMovesRequired << ", got: " << directions.size() << endl;
+                    
+                } else {
+                    // directions given by the client functions are in ascending orderder - first entry is next move
+                    // as the player sprites use queue of moves the moves received from client need to have their order reversed
+                    reverse(directions.begin(), directions.end());
+                    playerSprites[request.objectIndexes[i] - boardSprites.size()]->moveQueue = directions;
+                    
+                }
+                i++;
+            }
+        }
+    } else if (gameCtx->gameConf.printsMoveDirections) {
+        cout << "Received " << name << " moves: NONE \n\n";
+    }
+}
+
 void PlayState::updatePlayers() {
     
     BoardPlayerUpdateRequest policeUpdateRequest;
@@ -85,44 +126,15 @@ void PlayState::updatePlayers() {
     }
     criminalUpdateRequest.objectIndexes.push_back(cacheIndex);
 
-//    auto start = chrono::high_resolution_clock::now();
 
-
-    auto [policemanResponse, criminalResponse] = gameCtx->updateManager.makeRequest(boardStateCache, policeUpdateRequest, criminalUpdateRequest);
-//    auto end = chrono::high_resolution_clock::now();
+    auto [policemanResponse, criminalResponse] = gameCtx->updateManager.makeRequest(boardStateCache, policeUpdateRequest, criminalUpdateRequest, !gameCtx->gameConf.allowsPlayersSTDOut);
     
-//    std::cout << "" << chrono::duration_cast<chrono::milliseconds>(end - start).count() << std::endl;
-
-    if (policemanResponse) {
-        if (policemanResponse->moveDirection.size() != policeUpdateRequest.objectIndexes.size()) {
-            cerr << "Client function error, incorrect amount of moves given for police. Ignoring all of them..." << endl;
-        } else {
-            int i = 0;
-            for(auto& directions: policemanResponse->moveDirection) {
-                if (directions.size() != policeUpdateRequest.numberOfMovesRequired) {
-                } else {
-                    playerSprites[policeUpdateRequest.objectIndexes[i] - boardSprites.size()]->moveQueue = directions;
-                    
-                }
-                i++;
-            }
-        }
-    }
+    cout << endl;
     
-    if (criminalResponse) {
-        if (criminalResponse->moveDirection.size() != criminalUpdateRequest.objectIndexes.size()) {
-            cerr << "Client function error, incorrect amount of moves given for criminal. Ignoring all of them..." << endl;
-        } else {
-            int i = 0;
-            for(auto& directions: criminalResponse->moveDirection) {
-                if (directions.size() != criminalUpdateRequest.numberOfMovesRequired) {
-                } else {
-                    playerSprites[criminalUpdateRequest.objectIndexes[i] - boardSprites.size()]->moveQueue = directions;
-                }
-                i++;
-            }
-        }
-    }
+    controlPlayersUpdate(policeUpdateRequest, policemanResponse, "{POLICE}");
+    controlPlayersUpdate(criminalUpdateRequest, criminalResponse, "{CRIMINAL}");
+    
+    cout << endl;
 }
 
 void PlayState::populateBoardState() {

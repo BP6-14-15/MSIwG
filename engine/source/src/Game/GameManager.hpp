@@ -31,6 +31,9 @@ struct GameConfiguration {
     
     int clockLimit = 100; // T
     
+    bool allowsPlayersSTDOut = false;
+    bool printsMoveDirections = false;
+    
     std::optional<uint_fast32_t> customSeed = std::nullopt;
     bool applyCustomSeedToDefaultClient = false;
     
@@ -38,10 +41,23 @@ struct GameConfiguration {
     
 };
 
+class GameRemotePlayer {
+public:
+    CPGame::PlayerControllerCallback controlCallback;
+    CPGame::PlayerSignatureCallback signatureCallback;
+    
+    GameRemotePlayer(CPGame::PlayerControllerCallback control, CPGame::PlayerSignatureCallback signature)
+    : controlCallback(control), signatureCallback(signature) {
+        
+    }
+    GameRemotePlayer(const GameRemotePlayer&) = delete;
+    
+};
+
 class GameManager {
 public:
-    GameManager(CPGame::PlayerControllerCallback firstPlayer,
-                CPGame::PlayerControllerCallback secondPlayer,
+    GameManager(std::shared_ptr<GameRemotePlayer>  firstPlayer,
+                std::shared_ptr<GameRemotePlayer>  secondPlayer,
                 std::optional<GameConfiguration> conf
                 );
     ~GameManager();
