@@ -26,6 +26,20 @@ std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
     return out;
 }
 
+template<typename T>
+std::ostream& operator<< (std::ostream& out, const std::vector<std::vector<T>>& v) {
+    out << "[\n";
+    size_t last = v.size() - 1;
+    for(size_t i = 0; i < v.size(); ++i) {
+        out << "\t" << v[i];
+        if (i != last)
+            out << ", ";
+        out << std::endl;
+    }
+    out << "]";
+    return out;
+}
+
 namespace CPGame {
     std::vector<BoardPosition> surroundings(const BoardPosition& pos);
     

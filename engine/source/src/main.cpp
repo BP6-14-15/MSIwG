@@ -21,7 +21,7 @@ void updatePlayer(shared_ptr<const CPGame::Board> state,
                   CPGame::BoardPlayerUpdateRequest req,
                   shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>> promise
                   ) {
-    
+    std::cout << "hehe \n haha \n hihih" << std::endl;
     uniform_int_distribution<> d(1, 125);
     CPGame::BoardPlayerUpdateResult res;
     
@@ -58,8 +58,22 @@ void updatePlayer(shared_ptr<const CPGame::Board> state,
     
 }
 
+const char* defaultFirstPlayerSignature(void) {
+    return "default first player signature";
+    
+}
+
+
+const char* defaultSecondPlayerSignature(void) {
+    return "default second player signature";
+    
+}
+
 int main(int argc, char* args[]) {
-    PlayersSource src(updatePlayer, updatePlayer);
+    PlayersSource src(
+                      std::make_shared<GameRemotePlayer>(updatePlayer, defaultFirstPlayerSignature),
+                      std::make_shared<GameRemotePlayer>(updatePlayer, defaultSecondPlayerSignature)
+                      );
 
     GameConfiguration conf;
     parseArg(argc, args, conf, src);

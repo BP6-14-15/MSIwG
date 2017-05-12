@@ -87,6 +87,7 @@ void PlayState::initBoard(const GameConfiguration& gc, bool reload) {
     if (reload) {
         random_device dev;
         seed = dev();
+        gameCtx->initialSeed = seed;
     }
     
     gameCtx->resetGenerator();

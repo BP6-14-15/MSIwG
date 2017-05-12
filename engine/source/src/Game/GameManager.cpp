@@ -15,8 +15,8 @@ using namespace CPGame;
 shared_ptr<GameCtx> gameCtx;
 
 
-GameManager::GameManager(PlayerControllerCallback firstPlayer,
-                         PlayerControllerCallback secondPlayer,
+GameManager::GameManager(std::shared_ptr<GameRemotePlayer>  firstPlayer,
+                         std::shared_ptr<GameRemotePlayer>  secondPlayer,
                          std::optional<GameConfiguration> conf
                          ) {
     if (!conf) {

@@ -21,7 +21,7 @@ std::function<Signature> cast(AnyFcn f) {
     return reinterpret_cast<Signature*>(f);
 }
 
-CPGame::PlayerControllerCallback loadPlayerFunc(const string& fcnName, void* handler) {
+AnyFcn loadAnyPlayerFunc(const string& fcnName, void* handler) {
     // reset err
     dlerror();
     auto rawCallback = (AnyFcn)dlsym(handler, fcnName.c_str());
@@ -32,25 +32,53 @@ CPGame::PlayerControllerCallback loadPlayerFunc(const string& fcnName, void* han
         exit(1);
     }
     
-    auto fcn = cast<void(std::shared_ptr<const CPGame::Board>, CPGame::BoardPlayerUpdateRequest, std::shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>> res)>(rawCallback);
+    return rawCallback;
+}
+
+CPGame::PlayerSignatureCallback loadPlayerSignatureFunc(void* handler) {
+    auto fcn = cast<const char*(void)>(loadAnyPlayerFunc("gameEnginePlayerSignature", handler));
+    return fcn;
+    
+}
+
+CPGame::PlayerControllerCallback loadPlayerCallbackFunc(const string& fcnName, void* handler) {
+    auto fcn = cast<void(std::shared_ptr<const CPGame::Board>, CPGame::BoardPlayerUpdateRequest, std::shared_ptr<CPGame::Promise<CPGame::BoardPlayerUpdateResult>> res)>(loadAnyPlayerFunc(fcnName, handler));
     
     return fcn;
 }
 
-tuple<void*, CPGame::PlayerControllerCallback> loadPlayer(const string& libraryPath, const string& fcnName) {
-    void* handler = dlopen(libraryPath.c_str(), RTLD_NOW);
-    if (!handler) {
-        cerr << "Couldn't open library at path: " << libraryPath << endl;
-        exit(1);
+typedef tuple<void*, CPGame::PlayerControllerCallback, CPGame::PlayerSignatureCallback> LoadedPlayer;
+
+LoadedPlayer
+loadPlayer(const string& libraryPath, const string& fcnName, void* existingHandler = NULL) {
+    void* handler;
+    
+    if (existingHandler == NULL) {
+        handler = dlopen(libraryPath.c_str(), RTLD_NOW);
+        if (!handler) {
+            cerr << "Couldn't open library at path: " << libraryPath << endl;
+            exit(1);
+        }
+    } else {
+        handler = existingHandler;
+        
     }
     
-    auto fcn = loadPlayerFunc(fcnName, handler);
+    
+    auto fcn = loadPlayerCallbackFunc(fcnName, handler);
     if (!fcn) {
         cerr << "Couldn't setup player function " << fcnName << ", from library at path " << libraryPath << endl;
         exit(1);
     }
     
-    return make_tuple(handler, fcn);
+    auto signatureFcn = loadPlayerSignatureFunc(handler);
+    
+    if (!fcn) {
+        cerr << "Couldn't setup player function " << fcnName << ", from library at path " << libraryPath << endl;
+        exit(1);
+    }
+    
+    return make_tuple(handler, fcn, signatureFcn);
 }
 
 PlayersSource::~PlayersSource() {
@@ -62,7 +90,8 @@ PlayersSource::~PlayersSource() {
     }
 }
 
-PlayersSource::PlayersSource(CPGame::PlayerControllerCallback player1, CPGame::PlayerControllerCallback player2): player1(player1), player2(player2) {
+PlayersSource::PlayersSource(std::shared_ptr<GameRemotePlayer> player1, std::shared_ptr<GameRemotePlayer> player2)
+: player1(player1), player2(player2) {
     
 }
 
@@ -91,6 +120,8 @@ void printUsage(const char* progName) {
     
     printf("-r | --boardSeed    Custom board seed\n");
     printf("-l | --applySeed    Flag | Apply custom board seed to default client function");
+    printf("-x | --clientsPrint  Flag | If given allows client functions to print text to stdout");
+    printf("-z | --printsDirs   Flag | If given prints in console move directions received from clients");
     printf("\n\n");
     
 }
@@ -115,12 +146,14 @@ void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& sr
             {"pWM",    required_argument, 0, 'w'},
             {"pWDC",    required_argument, 0, 'y'},
             {"fpLibPath", required_argument, 0, 'a'}, // first player lib path
-            {"fpFcnName", required_argument, 0, 'b'}, // first player lib path
+            {"fpFcnName", required_argument, 0, 'b'}, // first player callback fcn name
             {"spLibPath", required_argument, 0, 'c'}, // second player lib path
-            {"spFcnName", required_argument, 0, 'd'}, // first player lib path
+            {"spFcnName", required_argument, 0, 'd'}, // second player callback fcn name
             {"boardSeed", required_argument, 0, 'r'},
             {"clock", required_argument, 0, 't'},
             {"applySeed", no_argument, 0, 'l'},
+            {"clientsPrint", no_argument, 0, 'x'},
+            {"printsDirs", no_argument, 0, 'z'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
@@ -128,7 +161,7 @@ void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& sr
         /* getopt_long stores the option index here. */
         int option_index = 0;
         
-        c = getopt_long(argc, args, "ha:b:c:d:s:e:g:h:n:r:m:p:o:w:y:t:l",
+        c = getopt_long(argc, args, "ha:b:c:d:s:e:g:h:n:r:m:p:o:w:y:t:lxz",
                         long_options, &option_index);
         
         /* Detect the end of the options. */
@@ -148,6 +181,12 @@ void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& sr
             case 'h':
                 printUsage(args[0]);
                 exit(0);
+                break;
+            case 'x':
+                conf.allowsPlayersSTDOut = true;
+                break;
+            case 'z':
+                conf.printsMoveDirections = true;
                 break;
             case 'r':
                 conf.customSeed = atof(optarg);
@@ -222,31 +261,41 @@ void parseArg(int argc, char* args[], GameConfiguration& conf, PlayersSource& sr
             exit(1);
         }
         if (!firstPlayerLib) {
-            cerr << "First player function name given, but lib path is missing" << endl;
+            cerr << "First player function name given, but library path is missing" << endl;
             exit(1);
         }
         
         auto res = loadPlayer(*firstPlayerLib, *firstPlayerFcn);
         src.firstPlayerLib = get<0>(res);
-        src.player1 = get<1>(res);
+        src.player1 = std::make_shared<GameRemotePlayer>(get<1>(res), get<2>(res));
     }
     
     if (secondPlayerLib || secondPlayerFcn) {
-        if (!secondPlayerFcn) {
-            cerr << "Second player lib path given, but function name is missing" << endl;
+        if (!secondPlayerLib) {
+            cerr << "Second player function name given, but library path is missing" << endl;
             exit(1);
         }
-        if (!secondPlayerLib) {
-            cerr << "Second player function name given, but lib path is missing" << endl;
+        
+        LoadedPlayer res;
+        
+        if (!secondPlayerFcn || *secondPlayerFcn == "-") {
+            secondPlayerFcn = firstPlayerFcn;
+        }
+        
+        if (!secondPlayerFcn) {
+            cerr << "Second player missing function name" << endl;
             exit(1);
         }
         
         if (*secondPlayerLib == *firstPlayerLib || *secondPlayerLib == "-") {
-            src.player2 = loadPlayerFunc(*secondPlayerFcn, src.firstPlayerLib);
+
+            res = loadPlayer(*firstPlayerLib, *secondPlayerFcn, src.firstPlayerLib);
         } else {
-            auto res = loadPlayer(*firstPlayerLib, *firstPlayerFcn);
-            src.secondPlayerLib = get<0>(res);
-            src.player2 = get<1>(res);
+            
+            res = loadPlayer(*secondPlayerLib, *secondPlayerFcn);
         }
+        
+        src.player2 = std::make_shared<GameRemotePlayer>(get<1>(res), get<2>(res));
+        
     }
 }

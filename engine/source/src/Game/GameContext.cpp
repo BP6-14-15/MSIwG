@@ -7,8 +7,11 @@
 //
 
 #include <random>
+#include <iostream>
+#include <unistd.h>
 #include "GameContext.hpp"
 #include "GraphicsContext.hpp"
+#include "Utils.hpp"
 
 using namespace std;
 using namespace CPGame;
@@ -26,8 +29,8 @@ int rollProbabilityDice(std::mt19937& generator) {
 }
 
 
-GameCtx::GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerControllerCallback secondPlayer, const GameConfiguration& gameConf)
-: gameConf(gameConf) {
+GameCtx::GameCtx(std::shared_ptr<GameRemotePlayer>  firstPlayer, std::shared_ptr<GameRemotePlayer>  secondPlayer, const GameConfiguration& gameConf)
+: gameConf(gameConf), updateManager(GameUpdateManager(firstPlayer, secondPlayer)) {
     if (gameConf.boardSize < 20) {
         throw GameCtxException(GameCtxExceptionType::incorrectBoardSize);
     }
@@ -54,8 +57,6 @@ GameCtx::GameCtx(CPGame::PlayerControllerCallback firstPlayer, CPGame::PlayerCon
 
     }
     randomGenerator = mt19937(initialSeed);
-    updateManager.criminalUpdate = firstPlayer;
-    updateManager.policemanUpdate = secondPlayer;
 }
 
 
@@ -65,12 +66,20 @@ GameCtx::~GameCtx() {
 
 void GameCtx::resetGenerator() {
     randomGenerator = mt19937(initialSeed);
+    
 }
 
-void GameUpdateManager::switchPlayers() {
-    auto criminal = criminalUpdate;
-    criminalUpdate = policemanUpdate;
-    policemanUpdate = criminal;
+void GameUpdateManager::setActivePlayersForRound(GameRound round) {
+    switch (round) {
+    case GameRound::first:
+            activeCriminalUpdate = firstPlayerUpdate;
+            activePoliceUpdate = secondPlayerUpdate;
+            break;
+    case GameRound::second:
+            activeCriminalUpdate = secondPlayerUpdate;
+            activePoliceUpdate = firstPlayerUpdate;
+            break;
+    }
 }
 
 template<class T>
@@ -90,6 +99,20 @@ chrono::milliseconds waitForFuture(future<T>& fObj, const std::chrono::time_poin
     
 }
 
+GameUpdateManager::GameUpdateManager(std::shared_ptr<GameRemotePlayer> firstPlayerUpdate, std::shared_ptr<GameRemotePlayer> secondPlayerUpdate)
+: firstPlayerUpdate(firstPlayerUpdate), secondPlayerUpdate(secondPlayerUpdate) {
+    this->setActivePlayersForRound(GameRound::first);
+    _devNullDescriptor = open("/dev/null", O_WRONLY);
+    if (_devNullDescriptor == -1) {
+        std::cerr << "Fatal error. Couldn't open /dev/null" << std::endl;
+        exit(1);
+    }
+}
+
+GameUpdateManager::~GameUpdateManager() {
+    close(_devNullDescriptor);
+}
+
 tuple<
     shared_ptr<CPGame::BoardPlayerUpdateResult>,
     shared_ptr<CPGame::BoardPlayerUpdateResult>
@@ -97,7 +120,8 @@ tuple<
 GameUpdateManager::makeRequest(
                                const Board& board,
                                const CPGame::BoardPlayerUpdateRequest& policemanReq,
-                               const CPGame::BoardPlayerUpdateRequest& criminalReq
+                               const CPGame::BoardPlayerUpdateRequest& criminalReq,
+                               bool lockSTDOut
 ) {
 
     auto policemanUpdatePromise = make_shared<CPGame::Promise<BoardPlayerUpdateResult>>();
@@ -108,22 +132,53 @@ GameUpdateManager::makeRequest(
 
     shared_ptr<BoardPlayerUpdateResult> criminalUpdateResult = nullptr;
 
-    auto start = chrono::high_resolution_clock::now();
-    assert(policemanUpdate);
-    assert(criminalUpdate);
-    
+    assert(activePoliceUpdate);
+    assert(activeCriminalUpdate);
     
     shared_ptr<const Board> sharedState = make_shared<const Board>(board);
     
-    thread policemanThread(policemanUpdate, sharedState, policemanReq, policemanUpdatePromise);
-    thread criminalThread(criminalUpdate, sharedState, criminalReq, criminalUpdatePromise);
+    cout << endl;
+    cout << "Police signature: " << activePoliceUpdate->signatureCallback() << endl;
+    cout << "Criminal signature: " << activeCriminalUpdate->signatureCallback() << endl;
+
+    int currentOutDescriptor = -1;
+    if (lockSTDOut) {
+        currentOutDescriptor = dup(STDOUT_FILENO);
+        
+        if (currentOutDescriptor == -1) {
+            cerr << "Warning: Couldn't duplicate STDOUT" << endl;
+        } else {
+            int dup2Res = dup2(_devNullDescriptor, STDOUT_FILENO);
+            if (dup2Res == -1) {
+                cerr << "Warning: Couldn't redirect STDOUT" << endl;
+                close(currentOutDescriptor);
+                currentOutDescriptor = -1;
+            }
+        }
+        
+        
+    }
+    
+    thread policemanThread(activePoliceUpdate->controlCallback, sharedState, policemanReq, policemanUpdatePromise);
+    thread criminalThread(activeCriminalUpdate->controlCallback, sharedState, criminalReq, criminalUpdatePromise);
+    
+    auto start = chrono::high_resolution_clock::now();
+
     policemanThread.detach();
     criminalThread.detach();
+    
     this_thread::sleep_until(start + chrono::milliseconds(500));
+    
+    if (lockSTDOut && currentOutDescriptor != -1) {
+        dup2(currentOutDescriptor, STDOUT_FILENO);
+        
+        close(currentOutDescriptor);
+        
+    }
     
     criminalUpdateResult = criminalUpdatePromise->getValue();
     policemanUpdateResult = policemanUpdatePromise->getValue();
-
+    
     return make_tuple(policemanUpdateResult, criminalUpdateResult);
     
 }

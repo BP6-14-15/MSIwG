@@ -49,4 +49,31 @@ inline std::ostream& operator<<(std::ostream& stream, const CPGame::BoardPositio
 }
 
 
+inline std::ostream& operator<<(std::ostream& stream, const CPGame::BoardMoveDirection& pos) {
+    std::string txt;
+    
+    switch (pos) {
+        case CPGame::BoardMoveDirection::bottom:
+            txt = " \\/ ";
+            break;
+        case CPGame::BoardMoveDirection::top:
+            txt = " /\\ ";
+            break;
+        case CPGame::BoardMoveDirection::left:
+            txt = " <- ";
+            break;
+        case CPGame::BoardMoveDirection::right:
+            txt = " -> ";
+            break;
+        case CPGame::BoardMoveDirection::none:
+            txt = " -- ";
+            break;
+    }
+    
+    stream << txt;
+    return stream;
+    
+}
+
+
 #endif /* Board_hpp */

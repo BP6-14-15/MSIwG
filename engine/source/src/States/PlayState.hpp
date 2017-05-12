@@ -100,6 +100,7 @@ class PlayState: public GameState {
     void reloadBtnAction(UIButton& btn);
     void startBtnAction(UIButton& btn);
     void updatePlayers();
+    void controlPlayersUpdate(CPGame::BoardPlayerUpdateRequest& request, std::shared_ptr<CPGame::BoardPlayerUpdateResult> result, const std::string& name);
     void populateBoardState();
     void nextPhase(); 
     void exit(); 
