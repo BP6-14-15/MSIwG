@@ -13,6 +13,10 @@
 #include <iostream>
 #include "Board.hpp"
 
+std::string currentTime(time_t* = nullptr);
+std::string currentDate(time_t* = nullptr);
+std::string currentDateAndTime();
+    
 template<typename T>
 std::ostream& operator<< (std::ostream& out, const std::vector<T>& v) {
     out << "[";

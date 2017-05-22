@@ -37,7 +37,7 @@ public:
     GameUpdateManager(const GameUpdateManager&) = delete;
     ~GameUpdateManager();
     
-    int _devNullDescriptor;
+    int _clientLogDescriptor = -1;
     const std::shared_ptr<GameRemotePlayer> secondPlayerUpdate;
     const std::shared_ptr<GameRemotePlayer> firstPlayerUpdate;
     

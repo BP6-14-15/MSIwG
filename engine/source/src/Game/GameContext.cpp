@@ -102,15 +102,21 @@ chrono::milliseconds waitForFuture(future<T>& fObj, const std::chrono::time_poin
 GameUpdateManager::GameUpdateManager(std::shared_ptr<GameRemotePlayer> firstPlayerUpdate, std::shared_ptr<GameRemotePlayer> secondPlayerUpdate)
 : firstPlayerUpdate(firstPlayerUpdate), secondPlayerUpdate(secondPlayerUpdate) {
     this->setActivePlayersForRound(GameRound::first);
-    _devNullDescriptor = open("/dev/null", O_WRONLY);
-    if (_devNullDescriptor == -1) {
-        std::cerr << "Fatal error. Couldn't open /dev/null" << std::endl;
+    
+    _clientLogDescriptor = open("engine.log", O_WRONLY | O_CREAT, 0755);
+    
+    if (_clientLogDescriptor == -1) {
+        std::cerr << "Fatal error. Couldn't open engine.log" << std::endl;
         exit(1);
     }
+    lseek(_clientLogDescriptor, SEEK_END, 0);
 }
 
 GameUpdateManager::~GameUpdateManager() {
-    close(_devNullDescriptor);
+    if (_clientLogDescriptor != -1) {
+        close(_clientLogDescriptor);
+
+    }
 }
 
 tuple<
@@ -148,11 +154,13 @@ GameUpdateManager::makeRequest(
         if (currentOutDescriptor == -1) {
             cerr << "Warning: Couldn't duplicate STDOUT" << endl;
         } else {
-            int dup2Res = dup2(_devNullDescriptor, STDOUT_FILENO);
+            int dup2Res = dup2(_clientLogDescriptor, STDOUT_FILENO);
             if (dup2Res == -1) {
                 cerr << "Warning: Couldn't redirect STDOUT" << endl;
                 close(currentOutDescriptor);
                 currentOutDescriptor = -1;
+            } else {
+                cout << "\n" << currentDateAndTime() << endl;
             }
         }
         

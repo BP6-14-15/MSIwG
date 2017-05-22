@@ -7,6 +7,7 @@
 //
 
 #include <stdio.h>
+#include <time.h>
 #include "Utils.hpp"
 
 
@@ -29,3 +30,31 @@ std::vector<CPGame::BoardPosition> CPGame::allSurroundings(const CPGame::BoardPo
     return surroundings;
     
 }
+
+std::string currentDate(time_t* tm){
+    time_t now = time(tm);
+    struct tm tstruct;
+    char buf[40];
+    tstruct = *localtime(&now);
+    //format: day DD-MM-YYYY
+    strftime(buf, sizeof(buf), "%A %d/%m/%Y", &tstruct);
+    return buf;
+}
+
+std::string currentTime(time_t* tm){
+    time_t now = time(NULL);
+    struct tm tstruct;
+    char buf[40];
+    tstruct = *localtime(&now);
+    //format: HH:mm:ss
+    strftime(buf, sizeof(buf), "%X", &tstruct);
+    return buf;
+}
+
+std::string currentDateAndTime() {
+    time_t tm = time(nullptr);
+    auto date = currentDate(&tm);
+    auto time = currentTime(&tm);
+    return date + " " + time;
+}
+
