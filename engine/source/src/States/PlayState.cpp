@@ -62,8 +62,9 @@ void PlayState::nextPhase() {
         boardSprites = vector<unique_ptr<BoardSprite>>(make_move_iterator(conf->initialBoardSprites.begin()), make_move_iterator(conf->initialBoardSprites.end()));
         conf->initialPlayerSprites.clear();
         conf->initialBoardSprites.clear();
-        populateBoardState();
         gameCtx->resetGenerator();
+        populateCtxCache();
+        populateBoardState();
 
         conf->currentPhase = PlayPhase::fourth;
         
@@ -138,7 +139,7 @@ void PlayState::updatePlayers() {
 }
 
 void PlayState::populateBoardState() {
-    BoardState boardState;    
+    BoardState boardState;
     
     int cacheIndex = 0;
     for(; cacheIndex < gameCtx->cachePlayerIndex; cacheIndex++) {
@@ -173,16 +174,16 @@ void PlayState::update() {
     if (updateCounter > UPDATE_INTERVAL) {
         updateCounter = 0;
         
-        int realClock = updateClock - CLOCK_INTERVAL + 1;
-        realClock = realClock - (realClock / 6); // remove difference caused by next step rendering
+        int realClock = updateClock - CLOCK_INTERVAL;
+        realClock = realClock - (realClock / CLOCK_INTERVAL); // remove difference caused by next step rendering
 
-        if (gameCtx->colisionCtx.thiefWasCaught || gameCtx->colisionCtx.thiefDidEscape || realClock == gameCtx->gameConf.clockLimit - 1) {
+        if (gameCtx->colisionCtx.thiefWasCaught || gameCtx->colisionCtx.thiefDidEscape || realClock == gameCtx->gameConf.clockLimit) {
             // collision are checked further, but we still want to render position of policeman catching thief
             // or thief in the gate, so we still need one move update interval to render those positions
             // will report collision with next update
             
             int criminalPoints = 0;
-            if (realClock == gameCtx->gameConf.clockLimit - 1) {
+            if (realClock == gameCtx->gameConf.clockLimit) {
                 criminalPoints = gameCtx->gameConf.clockLimit;
             } else if (gameCtx->colisionCtx.thiefDidEscape) {
                 criminalPoints = 2 * gameCtx->gameConf.clockLimit - realClock - 1;

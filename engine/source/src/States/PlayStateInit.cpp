@@ -34,6 +34,8 @@ PlayState::PlayState(std::shared_ptr<GraphicsCtx> ctx, std::shared_ptr<GameCtx> 
     boardStateCache.boardSize = gameCtx->gameConf.boardSize;
 
     computeBoardPosition(gameCtx->gameConf);
+    conf = make_unique<PlayConfiguration>();
+
     
     initBoard(gameCtx->gameConf);
     
@@ -73,8 +75,20 @@ PlayState::PlayState(std::shared_ptr<GraphicsCtx> ctx, std::shared_ptr<GameCtx> 
     
     resultTexture->drawingRect = {16, 16, 600, 100};
     
-    conf = make_unique<PlayConfiguration>();
+}
+
+void PlayState::populateCtxCache() {
+    int cacheIndx = 0;
     
+    for (auto& sprite: boardSprites) {
+        gameCtx->stateCache[cacheIndx] = sprite->getCoveredFields(*gameCtx);
+        cacheIndx++;
+    }
+    
+    for (auto& sprite: playerSprites) {
+        gameCtx->stateCache[cacheIndx] = sprite->getCoveredFields(*gameCtx);
+        cacheIndx++;
+    }
 }
 
 void PlayState::initBoard(const GameConfiguration& gc, bool reload) {
@@ -172,6 +186,20 @@ void PlayState::initBoard(const GameConfiguration& gc, bool reload) {
     boardStateCache.firstGateIndex = gameCtx->cacheGateIndex;
     boardStateCache.firstPlayerIndex = gameCtx->cachePlayerIndex;
     boardStateCache.criminalIndex = gameCtx->cacheCriminalIndex;
+    
+    //
+    conf->initialBoardSprites.clear();
+    conf->initialPlayerSprites.clear();
+    conf->initialBoardSprites.reserve(boardSprites.size());
+    conf->initialPlayerSprites.reserve(playerSprites.size());
+    
+    for(const auto& boardSprite: boardSprites) {
+        conf->initialBoardSprites.push_back(boardSprite->clone());
+    }
+    
+    for(const auto& playerSprite: playerSprites) {
+        conf->initialPlayerSprites.push_back(unique_ptr<Player>(new Player(*playerSprite.get())));
+    }
 
 }
 

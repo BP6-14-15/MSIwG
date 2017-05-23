@@ -22,7 +22,7 @@ class StateMachine;
 class GraphicsCtx: public std::enable_shared_from_this<GraphicsCtx> {
 private:
     const int SCREEN_FPS = 60;
-    const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS; // ms 
+    const int SCREEN_TICKS_PER_FRAME = 1000 / SCREEN_FPS; // ms
     
     std::shared_ptr<GameCtx> gameCtx;
     SDL_Window* window;

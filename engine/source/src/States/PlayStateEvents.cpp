@@ -11,16 +11,6 @@
 using namespace std;
 
 void PlayState::startBtnAction(UIButton& btn) {
-    conf->initialBoardSprites.reserve(boardSprites.size());
-    conf->initialPlayerSprites.reserve(playerSprites.size());
-    
-    for(const auto& boardSprite: boardSprites) {
-        conf->initialBoardSprites.push_back(boardSprite->clone());
-    }
-    
-    for(const auto& playerSprite: playerSprites) {
-        conf->initialPlayerSprites.push_back(unique_ptr<Player>(new Player(*playerSprite.get())));
-    }
     
     manualCleanup();
     
@@ -31,6 +21,7 @@ void PlayState::exit() {
     if (conf->currentPhase == PlayPhase::first) {
         manualCleanup();
     }
+    
     PlayStateEvent pe = PlayStateEvent::didRequestExit;
     if (delegate) {
         delegate(pe);

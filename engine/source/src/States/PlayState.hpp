@@ -59,6 +59,7 @@ class PlayState: public GameState {
     int secondPlayerPoints;
     
     void manualCleanup();
+    void populateCtxCache();
     
     std::shared_ptr<GameCtx> gameCtx = nullptr;
     
